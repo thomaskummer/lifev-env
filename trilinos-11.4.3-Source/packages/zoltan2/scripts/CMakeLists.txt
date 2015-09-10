@@ -1,7 +1,0 @@
-INCLUDE(TribitsCopyFilesToBinaryDir)
-TRIBITS_COPY_FILES_TO_BINARY_DIR(Zoltan2_copy_scripts
-  SOURCE_FILES copyright.txt   xml2dox.py xml2headerFile.py
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-  DEST_DIR ${CMAKE_CURRENT_BINARY_DIR}
-  NOEXEPREFIX
-)
