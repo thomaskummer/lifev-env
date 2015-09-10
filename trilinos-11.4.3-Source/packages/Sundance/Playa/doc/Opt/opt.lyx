@@ -1,0 +1,948 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass extarticle
+\begin_preamble
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\fdo}[1]{\mathcal{D}_{#1}}
+\newcommand{\sdo}[1]{D_{#1}}
+\newcommand{\tdo}[1]{D_{#1}}
+\newcommand{\fd}[2]{\fdo{#1} #2}
+\newcommand{\sd}[2]{\sdo{#1} #2}
+\newcommand{\td}[2]{\tdo{#1} #2}
+\newcommand{\pdd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pddd}[2]{\frac{\partial^3 #1}{\partial #2^3}}
+\newcommand{\pmix}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+\newcommand{\pmixx}[4]{\frac{\partial^3 #1}{\partial #2 \partial #3 \partial #4}}
+\newcommand{\funcd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\spaced}[2]{{\cal D}^{#1} #2}
+\newcommand{\totald}[2]{{D}^{#1} #2}
+
+\newcommand{\abs}[1]{\left\vert{#1}\right\vert}
+\newcommand{\od}[2]{\frac{d #1}{d #2}}
+\newcommand{\odd}[2]{\frac{d^2 #1}{d #2^2}}
+\newcommand{\R}{\mathbb{R}}
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams
+theorems-ams-extended
+\end_modules
+\language english
+\inputencoding auto
+\font_roman palatino
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\branch answers
+\selected 1
+\color #5555ff
+\end_branch
+\leftmargin 0.9in
+\topmargin 0.75in
+\rightmargin 0.9in
+\bottommargin 0.75in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Playa/Opt User's Guide
+\end_layout
+
+\begin_layout Section
+Overview
+\end_layout
+
+\begin_layout Standard
+Playa/Opt is a suite of components for writing algorithms for large-scale
+ optimization, based on the Playa linear algebra components.
+\end_layout
+
+\begin_layout Subsection
+Code style conventions
+\end_layout
+
+\begin_layout Standard
+Class names begin with capital letters, and each word within the name also
+ begins capitalized.
+ For example: 
+\family typewriter
+LineSearchBase
+\family default
+ and 
+\family typewriter
+SteepestDescent
+\family default
+ are classes.
+ Function names and variables usually begin with lower-case letters, but
+ subsequent words within the name are capitalized.
+ For example: 
+\family typewriter
+evalGrad()
+\family default
+ is a function and 
+\family typewriter
+maxIters
+\family default
+ is a variable.
+ Variables that are data members of a class have names ending with an underscore
+, for example: 
+\family typewriter
+maxIters_
+\family default
+ is a data member.
+ Statements such as
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+maxIters_ = maxIters;
+\end_layout
+
+\end_inset
+
+are fairly common: in this statement we're assigning to a data member (
+\family typewriter
+maxIters_
+\family default
+) a value stored in some non-data-member variable (
+\family typewriter
+maxIters
+\family default
+).
+ 
+\end_layout
+
+\begin_layout Subsection
+Memory management
+\end_layout
+
+\begin_layout Section
+Writing an objective function
+\end_layout
+
+\begin_layout Standard
+The simplest use case for Playa/Opt is to use an existing optimizer to minimize
+ a user-defined objective function.
+ In this case you won't need to write any new optimization components, but
+ you'll need to write an objective function.
+ This involves writing a new C++ class that derives from the 
+\family typewriter
+ObjectiveBase
+\family default
+ abstract class.
+ At minimum, you'll need to implement 
+\end_layout
+
+\begin_layout Standard
+An objective function type is represented by a concrete subclass of the
+ 
+\family typewriter
+ObjectiveBase
+\family default
+ abstract class.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+virtual void eval(const Vector<double>& x, double& f) const 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Example: the Rosenbrock function
+\end_layout
+
+\begin_layout Standard
+Minimizing the Rosenbrock function is a popular test problem for unconstrained
+ optimization algorithms.
+ The Rosenbrock function is defined on 
+\begin_inset Formula $\R^{2}$
+\end_inset
+
+, 
+\begin_inset Formula \[
+f_{R}\left(x,y\right)=\alpha\left(y-x^{2}\right)^{2}+\left(x-1\right)^{2}.\]
+
+\end_inset
+
+It is easy to verify that the unique minimum is at 
+\begin_inset Formula $\left(x^{*},y^{*}\right)=(1,1)$
+\end_inset
+
+ for any value of 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename Ros-alpha-1.pdf
+	scale 50
+	clip
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename Ros-alpha-10.pdf
+	scale 50
+	clip
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename Ros-alpha-100.pdf
+	scale 50
+	clip
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+The Rosenbrock function for 
+\begin_inset Formula $\alpha=1$
+\end_inset
+
+, 10, 100.
+ As 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ increases the curved valley becomes more pronounced, making numerical optimizat
+ion more difficult.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We're interested in testing large-scale algorithms, so we'll want a function
+ with more variables.
+ The extended Rosenbrock function 
+\begin_inset Formula $f_{M}:\R^{2M}\to\R$
+\end_inset
+
+ is formed by simply replicating the Rosenbrock function on 
+\begin_inset Formula $M$
+\end_inset
+
+ pairs of coordinates in 
+\begin_inset Formula $\R^{2M}$
+\end_inset
+
+, 
+\begin_inset Formula \[
+f_{M}\left(\mathbf{x}\right)=\sum_{n=0}^{M-1}\left[\alpha\left(x_{2n+1}-x_{2n}^{2}\right)^{2}+\left(x_{2n}-1\right)^{2}\right].\]
+
+\end_inset
+
+The unique minimum is at 
+\begin_inset Formula $\mathbf{x^{*}}=\left(1,1,\cdots,1,1\right)^{T}$
+\end_inset
+
+.
+ The 
+\begin_inset Formula $k$
+\end_inset
+
+-th component of the gradient is computed easily (with a little care in
+ keeping track of indices):
+\begin_inset Formula \[
+\pd{f_{M}}{x_{k}}=\begin{cases}
+-4\alpha\left(x_{k+1}-x_{k}^{2}\right)x_{k}+2\left(x_{k}-1\right) & k\;\mbox{even}\\
+2\alpha\left(x_{k}-x_{k-1}^{2}\right) & k\;\mbox{odd}\end{cases}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Code for the Rosenbrock function can be found in the file
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Playa/tests/Opt/Rosenbrock.hpp
+\end_layout
+
+\begin_layout Plain Layout
+
+Playa/tests/Opt/Rosenbrock.cpp
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Object design for the extended Rosenbrock function
+\end_layout
+
+\begin_layout Standard
+Simple as it may be, the extended Rosenbrock function provides an opportunity
+ to illustrate several principles of object-oriented programming.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Encapsulation:
+\series default
+ Code to evaluate 
+\begin_inset Formula $f_{M}$
+\end_inset
+
+ needs to know about the problem size 
+\begin_inset Formula $2M$
+\end_inset
+
+ and the valley parameter 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+ With the Rosenbrock function represented as an object, these data may be
+ stored as data members.
+ Values of these data members need to be set by the user; this is the job
+ of the object 
+\series bold
+constructor
+\series default
+ function.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Polymorphism
+\series default
+: We'll want to use our Rosenbrock function object in an optimization algorithm.
+ Obviously the code for the algorithm shouldn't be hardwired to use the
+ Rosenbrock function; instead, it will be written in terms of an 
+\series bold
+abstract interface
+\series default
+ for objective functions.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Inheritance
+\series default
+: Some capabilities we'll want from our Rosenbrock function object will
+ be common to many other functions.
+ For example, a method for letting the user set the desired amount of diagnostic
+ output isn't specific to the Rosenbrock function, but can be common to
+ all (or at least most) function objects.
+ By deriving from a base class, the Rosenbrock object will inherit any common
+ properties defined in the base class.
+\end_layout
+
+\begin_layout Subsubsection
+Declaration of the Rosenbrock function
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\footnotesize\sffamily},language={C++},tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+/* C++ class for the Rosenbrock function */
+\end_layout
+
+\begin_layout Plain Layout
+
+class Rosenbrock : public ObjectiveBase 
+\end_layout
+
+\begin_layout Plain Layout
+
+{ 
+\end_layout
+
+\begin_layout Plain Layout
+
+public:
+\end_layout
+
+\begin_layout Plain Layout
+
+	/* Constructor */
+\end_layout
+
+\begin_layout Plain Layout
+
+	Rosenbrock(int M, double alpha, const VectorType<double>& vecType); 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	/* Evaluate the function and its gradient */
+\end_layout
+
+\begin_layout Plain Layout
+
+	void  evalGrad(const Vector<double>& x, double& f, Vector<double>& grad)
+ const ;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	/* Evaluate the function */
+\end_layout
+
+\begin_layout Plain Layout
+
+	void eval(const Vector<double>& x, double& f) const ;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	/* Return the starting point for the optimization loop */
+\end_layout
+
+\begin_layout Plain Layout
+
+	Vector<double> getInit() const ;
+\end_layout
+
+\begin_layout Plain Layout
+
+private:
+\end_layout
+
+\begin_layout Plain Layout
+
+	int N_;                                /* Problem size */
+\end_layout
+
+\begin_layout Plain Layout
+
+	VectorSpace<double> vs_;               /* Vector space object */
+\end_layout
+
+\begin_layout Plain Layout
+
+	double alpha_;                         /* Parameter */
+\end_layout
+
+\begin_layout Plain Layout
+
+};
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+The constructor
+\end_layout
+
+\begin_layout Standard
+One can't do much with an objective function object until one actually has
+ such an object.
+ Making objects of a specified type and with specified data members is the
+ job of the constructor.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language={C++},tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Rosenbrock::Rosenbrock(int M, double alpha, const VectorType<double>& vecType)
+\end_layout
+
+\begin_layout Plain Layout
+
+	: M_(M),          /* Initializer for M_ */
+\end_layout
+
+\begin_layout Plain Layout
+
+	alpha_(alpha),    /* Initializer for alpha_ */
+\end_layout
+
+\begin_layout Plain Layout
+
+	vs_(vecType.createEvenlyPartitionedSpace(MPIComm::self(), 2*M)) /* Initializer
+ for vs_ */
+\end_layout
+
+\begin_layout Plain Layout
+
+{ }
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If you're new to C++ programming, two features unique to constructors should
+ be mentioned.
+ First is that the constructor has no return type, not even 
+\begin_inset Quotes eld
+\end_inset
+
+void.
+\begin_inset Quotes erd
+\end_inset
+
+ Second is that the data members 
+\family typewriter
+M_
+\family default
+, 
+\family typewriter
+alpha_
+\family default
+, and 
+\family typewriter
+vs_
+\family default
+ are initialized before the function body (
+\emph on
+i.e.
+\emph default
+, before the opening curly brace).
+ This has the same end result as initializing them with assignment operators
+ inside the function body, as in the code below.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language={C++},tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Rosenbrock::Rosenbrock(int M, double alpha, const VectorType<double>& vecType)
+\end_layout
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\begin_layout Plain Layout
+
+	M_ = M;
+\end_layout
+
+\begin_layout Plain Layout
+
+	alpha_ = alpha; 
+\end_layout
+
+\begin_layout Plain Layout
+
+	vs_ = vecType.createEvenlyPartitionedSpace(MPIComm::self(), 2*M);
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+However, while the end result is the same, the low-level steps taken to
+ get there are not.
+ In the first implementation using initializers, each data member is initialized
+ by a call to its constructor using the arguments given to the initializer.
+ Without initializers, each data member is implicitly initialized by an
+ empty constructor.
+ In the code body, these empty objects then have values assigned to them
+ by a call to the assignment operator.
+ With initializers, we have a cost of one constructor call per data member.
+ Without initializers, we have for each data member the cost of its empty
+ constructor call followed by the cost of an assignment operation.
+ In cases (such as our Rosenbrock function) where the cost of empty constructors
+ is negligible, the overall difference is negligible.
+ However, some data members may have expensive empty constructors, so in
+ general initializers are to be preferred and it's good programming practice
+ to get in the habit of using them.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},language={C++},tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\begin_layout Plain Layout
+
+	/* Construct an object on the stack.
+ It will be destroyed automatically upon */
+\end_layout
+
+\begin_layout Plain Layout
+
+	/* leaving scope */
+\end_layout
+
+\begin_layout Plain Layout
+
+	Rosenbrock f1(12, 100.0, vt);                    
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	/* Construct an object on the heap.
+ It will not be destroyed automatically upon */
+\end_layout
+
+\begin_layout Plain Layout
+
+	/* scope, so it must be deleted explicitly by the user */
+\end_layout
+
+\begin_layout Plain Layout
+
+	ObjectiveBase* f2 = new Rosenbrock(1, 10.0, vt);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	RCP<ObjectiveBase> f3 = rcp(new Rosenbrock(4, 3.14159, vt));
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	/* Delete the object f2.
+ If this is not done, memory will be leaked! */
+\end_layout
+
+\begin_layout Plain Layout
+
+	delete f2;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	/* At end of scope (close curly brace) all local variables are destroyed
+ */
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+The 
+\family typewriter
+eval()
+\family default
+ member function
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\ttfamily},tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+void Rosenbrock::eval(const Vector<double>& x, double& f) const 
+\end_layout
+
+\begin_layout Plain Layout
+
+{   
+\end_layout
+
+\begin_layout Plain Layout
+
+	f = 0.0;   
+\end_layout
+
+\begin_layout Plain Layout
+
+	for (int i=0; i<N_; i++) {
+\end_layout
+
+\begin_layout Plain Layout
+
+	    double p = x[2*i+1] - x[2*i]*x[2*i];
+\end_layout
+
+\begin_layout Plain Layout
+
+	    double q = 1.0-x[2*i];     
+\end_layout
+
+\begin_layout Plain Layout
+
+		f += alpha_ * p*p + q*q;   
+\end_layout
+
+\begin_layout Plain Layout
+
+	} 
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+The 
+\family typewriter
+evalGrad()
+\family default
+ member function
+\end_layout
+
+\begin_layout Standard
+The evalGrad() member function evaluates the function and its gradient concurren
+tly.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},language={C++},tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+void Rosenbrock::evalGrad(const Vector<double>& x, double& f, Vector<double>&
+ df) const 
+\end_layout
+
+\begin_layout Plain Layout
+
+{   
+\end_layout
+
+\begin_layout Plain Layout
+
+	f = 0.0;           // Initialize the running sum to zero
+\end_layout
+
+\begin_layout Plain Layout
+
+	for (int i=0; i<N_; i++) {
+\end_layout
+
+\begin_layout Plain Layout
+
+		double p = x[2*i+1] - x[2*i]*x[2*i];     
+\end_layout
+
+\begin_layout Plain Layout
+
+		double q = 1.0-x[2*i];     
+\end_layout
+
+\begin_layout Plain Layout
+
+		f += alpha_ * p*p + q*q;                   // Add to the function value
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+		df[2*i] = -4.0*alpha_*p*x[2*i] - 2.0*q;    // Set an even element of the
+ gradient 
+\end_layout
+
+\begin_layout Plain Layout
+
+		df[2*i+1] = 2.0*alpha_*p;                  // Set an odd element of the
+ gradient
+\end_layout
+
+\begin_layout Plain Layout
+
+	}   
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Optimization components
+\end_layout
+
+\begin_layout Subsection
+Convergence test components
+\end_layout
+
+\begin_layout Subsection
+Line search components
+\end_layout
+
+\begin_layout Subsection
+Search direction generators
+\end_layout
+
+\begin_layout Subsection
+Line search based optimizer drivers
+\end_layout
+
+\begin_layout Subsubsection
+Generic driver
+\end_layout
+
+\begin_layout Subsubsection
+Steepest descent
+\end_layout
+
+\begin_layout Subsubsection
+Limited memory BFGS 
+\end_layout
+
+\begin_layout Section
+\start_of_appendix
+Parameter documentation
+\end_layout
+
+\end_body
+\end_document

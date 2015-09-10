@@ -1,0 +1,160 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{color}
+\usepackage{moreverb}
+
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\fdo}[1]{\mathcal{D}_{#1}}
+\newcommand{\sdo}[1]{D_{#1}}
+\newcommand{\tdo}[1]{D_{#1}}
+\newcommand{\fd}[2]{\fdo{#1} #2}
+\newcommand{\sd}[2]{\sdo{#1} #2}
+\newcommand{\td}[2]{\tdo{#1} #2}
+\newcommand{\pdd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pddd}[2]{\frac{\partial^3 #1}{\partial #2^3}}
+\newcommand{\pmix}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+\newcommand{\pmixx}[4]{\frac{\partial^3 #1}{\partial #2 \partial #3 \partial #4}}
+\newcommand{\funcd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\spaced}[2]{{\cal D}^{#1} #2}
+\newcommand{\totald}[2]{{D}^{#1} #2}
+
+\newcommand{\abs}[1]{\left\vert{#1}\right\vert}
+\newcommand{\od}[2]{\frac{d #1}{d #2}}
+\newcommand{\odd}[2]{\frac{d^2 #1}{d #2^2}}
+\newcommand{\R}{\mathbb{R}}
+
+\definecolor{lightgray}{rgb}{0.9,0.9,0.9}
+\definecolor{red}{rgb}{0.5,0.0,0.0}
+\definecolor{green}{rgb}{0.0,0.5,0.0}
+
+\lstset{language=C++,tabsize=2,backgroundcolor=\color{lightgray}}
+\lstset{frame=single}
+\lstset{basicstyle=\ttfamily\small}
+\lstset{commentstyle=\itshape}
+\end_preamble
+\options xcolor=dvipsnames
+\use_default_options true
+\begin_modules
+theorems-ams
+theorems-ams-extended
+\end_modules
+\language english
+\inputencoding auto
+\font_roman palatino
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\branch answers
+\selected 1
+\color #5555ff
+\end_branch
+\leftmargin 0.9in
+\topmargin 0.75in
+\rightmargin 0.9in
+\bottommargin 0.75in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Section
+\start_of_appendix
+Review of design concepts
+\end_layout
+
+\begin_layout Standard
+Some important points to take away from this description of linear algebra
+ objects are:
+\end_layout
+
+\begin_layout Enumerate
+We try to hide complicated, implementation-dependent operations (such as
+ configuration and filling of a sparse matrix) behind abstract factory interface
+s.
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+This lets us change implementations simply by changing which factory we
+ use.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+We do as few 
+\emph on
+explicit
+\emph default
+ matrix operations as possible.
+ For example, in computing 
+\begin_inset Formula $ABx$
+\end_inset
+
+ or 
+\begin_inset Formula $A^{-1}x$
+\end_inset
+
+ with overloaded operators we never actually form the matrices 
+\begin_inset Formula $AB$
+\end_inset
+
+ or 
+\begin_inset Formula $A^{-1}$
+\end_inset
+
+.
+ Explicit matrix-matrix products are available for those rare cases when
+ they are needed.
+ 
+\end_layout
+
+\begin_layout Enumerate
+We avoid low-level operations on vector 
+\emph on
+elements
+\emph default
+ whenever possible, preferring high-level functions that operate on the
+ vector as an object.
+ 
+\end_layout
+
+\begin_layout Standard
+Keep these considerations in mind as we move on to discuss objects for meshes,
+ geometric regions, symbolic expressions, quadrature, and other components
+ of a PDE simulation.
+ 
+\end_layout
+
+\end_body
+\end_document

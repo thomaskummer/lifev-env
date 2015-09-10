@@ -1,0 +1,110 @@
+##############################################################################
+#
+# Make variables for use by Trilinos/KokkosClassic clients. 
+#
+# Do not edit: This file was generated automatically by CMake.
+#
+##############################################################################
+
+
+## ---------------------------------------------------------------------------
+## Compilers used by Trilinos/KokkosClassic build
+## ---------------------------------------------------------------------------
+
+KokkosClassic_CXX_COMPILER=/usr/lib64/openmpi/bin/mpicxx
+
+KokkosClassic_C_COMPILER=/usr/lib64/openmpi/bin/mpicc
+
+KokkosClassic_FORTRAN_COMPILER=/usr/lib64/openmpi/bin/mpif90
+KokkosClassic_Fortran_COMPILER=/usr/lib64/openmpi/bin/mpif90
+
+
+## ---------------------------------------------------------------------------
+## Compiler flags used by Trilinos/KokkosClassic build
+## ---------------------------------------------------------------------------
+
+## Set compiler flags, including those determined by build type
+KokkosClassic_CXX_FLAGS= -O3
+KokkosClassic_CXX_COMPILER_FLAGS= -O3
+
+KokkosClassic_C_FLAGS= -O3
+KokkosClassic_C_COMPILER_FLAGS= -O3
+
+KokkosClassic_FORTRAN_FLAGS= -O3
+KokkosClassic_Fortran_COMPILER_FLAGS= -O3
+
+## Extra link flags (e.g., specification of fortran libraries)
+KokkosClassic_EXTRA_LD_FLAGS=-lrt
+
+## This is the command-line entry used for setting rpaths. In a build
+## with static libraries it will be empty. 
+KokkosClassic_SHARED_LIB_RPATH_COMMAND=
+KokkosClassic_BUILD_SHARED_LIBS=OFF
+
+KokkosClassic_LINKER=/usr/bin/ld
+KokkosClassic_AR=/usr/bin/ar
+
+## ---------------------------------------------------------------------------
+## Set library specifications and paths 
+## ---------------------------------------------------------------------------
+
+## The project version number
+KokkosClassic_VERSION=11.4.3
+
+## List of package include dirs
+KokkosClassic_INCLUDE_DIRS= -I/local/kummerth/lifev-env/lifev-env/trilinos-install/include
+
+## List of package library paths
+KokkosClassic_LIBRARY_DIRS= -L/local/kummerth/lifev-env/lifev-env/trilinos-install/lib
+
+## List of package libraries
+KokkosClassic_LIBRARIES= -lkokkosdisttsqr -lkokkosnodetsqr -lkokkoslinalg -lkokkosnodeapi -lkokkos -ltpi -lteuchosremainder -lteuchosnumerics -lteuchoscomm -lteuchosparameterlist -lteuchoscore
+
+## Specification of directories for TPL headers
+KokkosClassic_TPL_INCLUDE_DIRS= -I/usr/include
+
+## Specification of directories for TPL libraries
+KokkosClassic_TPL_LIBRARY_DIRS=
+
+## List of required TPLs
+KokkosClassic_TPL_LIBRARIES= /usr/lib64/liblapack.so /usr/lib64/libblas.so
+
+## ---------------------------------------------------------------------------
+## MPI specific variables
+##   These variables are provided to make it easier to get the mpi libraries
+##   and includes on systems that do not use the mpi wrappers for compiling
+## ---------------------------------------------------------------------------
+
+KokkosClassic_MPI_LIBRARIES=
+KokkosClassic_MPI_LIBRARY_DIRS=
+KokkosClassic_MPI_INCLUDE_DIRS=
+KokkosClassic_MPI_EXEC=/usr/bin/mpiexec
+KokkosClassic_MPI_EXEC_MAX_NUMPROCS=4
+KokkosClassic_MPI_EXEC_NUMPROCS_FLAG=-np
+
+## ---------------------------------------------------------------------------
+## Set useful general variables 
+## ---------------------------------------------------------------------------
+
+## The packages enabled for this project
+KokkosClassic_PACKAGE_LIST= KokkosClassic ThreadPool Teuchos TeuchosRemainder TeuchosNumerics TeuchosComm TeuchosParameterList TeuchosCore
+
+## The TPLs enabled for this project
+KokkosClassic_TPL_LIST= Boost LAPACK BLAS MPI Pthread
+
+## ---------------------------------------------------------------------------
+## Deprecated variables
+##   These variables from the autotools version of Makefile.export.<package>
+##   have been deprecated. To help avoid confusion with projects that haven't
+##   migrated to the new version of the variable names when the don't compile.
+##   This will put an obvious statement in the link line that these Trilinos
+##   Makefile variables are no longer used. Without this there would be a link
+##   error with no obvious reason as to why other than the lack of Trilinos libs
+##   which would be confusing since the link line in the Makefile would have 
+##   stated to put them on the line.
+## ---------------------------------------------------------------------------
+
+KOKKOSCLASSIC_LIBS="The Trilinos variable KOKKOSCLASSIC_LIBS has been deprecated. Please see the documentation on the Makefile.export capability for instructions on how to transition to the new system."
+KOKKOSCLASSIC_INCLUDES="The Trilinos variable KOKKOSCLASSIC_INCLUDES has been deprecated. Please see the documentation on the Makefile.export capability for instructions on how to transition to the new system."
+
+

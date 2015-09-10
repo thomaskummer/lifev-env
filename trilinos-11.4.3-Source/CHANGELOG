@@ -1,0 +1,15 @@
+###############################################################################
+#                                                                             #
+# Trilinos Release 11.4 Changelog                                             #
+#                                                                             #
+###############################################################################
+
+Release update 11.4.3 November 21, 2013
+
+1. Tuechos - LAPACK: Added _GEQP3 (QR with column pivoting).
+
+Release update 11.4.2 October 22, 2013
+
+1. Kokkos - Fix missing file in install
+
+2. Thyra  - Fix a backwards compatibility issue with a missing header file.

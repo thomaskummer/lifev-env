@@ -1,0 +1,90 @@
+##############################################################################
+#
+# Make variables for use by Trilinos clients. 
+#
+# Do not edit: This file was generated automatically by CMake.
+#
+##############################################################################
+
+
+## ---------------------------------------------------------------------------
+## Compilers used by Trilinos build
+## ---------------------------------------------------------------------------
+
+Trilinos_CXX_COMPILER=/usr/lib64/openmpi/bin/mpicxx
+
+Trilinos_C_COMPILER=/usr/lib64/openmpi/bin/mpicc
+
+Trilinos_Fortran_COMPILER=/usr/lib64/openmpi/bin/mpif90
+
+
+## ---------------------------------------------------------------------------
+## Compiler flags used by Trilinos build
+## ---------------------------------------------------------------------------
+
+Trilinos_CXX_COMPILER_FLAGS= -O3
+
+Trilinos_C_COMPILER_FLAGS= -O3
+
+Trilinos_Fortran_COMPILER_FLAGS= -O3
+
+## Extra link flags (e.g., specification of fortran libraries)
+Trilinos_EXTRA_LD_FLAGS=-lrt
+
+## This is the command-line entry used for setting rpaths. In a build
+## with static libraries it will be empty. 
+Trilinos_SHARED_LIB_RPATH_COMMAND=
+Trilinos_BUILD_SHARED_LIBS=OFF
+
+Trilinos_LINKER=/usr/bin/ld
+Trilinos_AR=/usr/bin/ar
+
+
+## ---------------------------------------------------------------------------
+## Set library specifications and paths 
+## ---------------------------------------------------------------------------
+
+## The project version number
+Trilinos_VERSION=11.4.3
+
+## The project include file directories.
+Trilinos_INCLUDE_DIRS= -I/local/kummerth/lifev-env/lifev-env/trilinos-install/include
+
+## The project library directories.
+Trilinos_LIBRARY_DIRS= -L/local/kummerth/lifev-env/lifev-env/trilinos-install/lib
+
+## The project libraries.
+Trilinos_LIBRARIES= -lrythmos -llocathyra -llocaepetra -llocalapack -lloca -lnoxepetra -lnoxlapack -lnox -lteko -lstratimikos -lstratimikosbelos -lstratimikosaztecoo -lstratimikosamesos -lstratimikosml -lstratimikosifpack -lshylu -lanasazitpetra -lModeLaplace -lanasaziepetra -lanasazi -lbelostpetra -lbelosepetra -lbelos -lml -lifpack -lamesos -lgaleri-xpetra -lgaleri -laztecoo -lisorropia -lthyratpetra -lthyraepetraext -lthyraepetra -lthyracore -lthyratpetra -lthyraepetraext -lthyraepetra -lthyracore -lxpetra-sup -lxpetra-ext -lxpetra -lepetraext -ltpetraext -ltpetrainout -ltpetra -ltriutils -lzoltan -lepetra -lkokkosdisttsqr -lkokkosnodetsqr -lkokkoslinalg -lkokkosnodeapi -lkokkos -lkokkosdisttsqr -lkokkosnodetsqr -lkokkoslinalg -lkokkosnodeapi -lkokkos -lrtop -lsacado -ltpi -lteuchosremainder -lteuchosnumerics -lteuchoscomm -lteuchosparameterlist -lteuchoscore -lteuchosremainder -lteuchosnumerics -lteuchoscomm -lteuchosparameterlist -lteuchoscore
+
+## The project tpl include paths
+Trilinos_TPL_INCLUDE_DIRS= -I/usr/include -I/usr/include/suitesparse -I/local/kummerth/lifev-env/ParMetis-3.2.0
+
+## The project tpl library paths
+Trilinos_TPL_LIBRARY_DIRS=
+
+## The project tpl libraries
+Trilinos_TPL_LIBRARIES= /usr/lib64/libhdf5.so /usr/lib64/libz.so /usr/lib64/libamd.so /usr/lib64/libumfpack.so /usr/lib64/libamd.so /usr/lib64/libz.so /local/kummerth/lifev-env/ParMetis-3.2.0/libparmetis.a /local/kummerth/lifev-env/ParMetis-3.2.0/libmetis.a /usr/lib64/liblapack.so /usr/lib64/libblas.so
+
+## ---------------------------------------------------------------------------
+## MPI specific variables
+##   These variables are provided to make it easier to get the mpi libraries
+##   and includes on systems that do not use the mpi wrappers for compiling
+## ---------------------------------------------------------------------------
+
+Trilinos_MPI_LIBRARIES=
+Trilinos_MPI_LIBRARY_DIRS=
+Trilinos_MPI_INCLUDE_DIRS=
+Trilinos_MPI_EXEC=/usr/bin/mpiexec
+Trilinos_MPI_EXEC_MAX_NUMPROCS=4
+Trilinos_MPI_EXEC_NUMPROCS_FLAG=-np
+
+## ---------------------------------------------------------------------------
+## Set useful general variables 
+## ---------------------------------------------------------------------------
+
+## The packages enabled for this project
+Trilinos_PACKAGE_LIST= Rythmos NOX Teko Stratimikos ShyLU Anasazi Belos ML Ifpack Amesos Galeri AztecOO Isorropia Thyra ThyraTpetraAdapters ThyraEpetraExtAdapters ThyraEpetraAdapters ThyraCore Xpetra EpetraExt Tpetra Triutils Zoltan Epetra Kokkos KokkosClassic RTOp Sacado ThreadPool Teuchos TeuchosRemainder TeuchosNumerics TeuchosComm TeuchosParameterList TeuchosCore
+
+## The TPLs enabled for this project
+Trilinos_TPL_LIST= HDF5 AMD UMFPACK Zlib ParMETIS Boost LAPACK BLAS MPI Pthread
+

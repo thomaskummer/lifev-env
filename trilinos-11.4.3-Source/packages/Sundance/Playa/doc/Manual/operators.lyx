@@ -1,0 +1,746 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{color}
+\usepackage{moreverb}
+
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\fdo}[1]{\mathcal{D}_{#1}}
+\newcommand{\sdo}[1]{D_{#1}}
+\newcommand{\tdo}[1]{D_{#1}}
+\newcommand{\fd}[2]{\fdo{#1} #2}
+\newcommand{\sd}[2]{\sdo{#1} #2}
+\newcommand{\td}[2]{\tdo{#1} #2}
+\newcommand{\pdd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pddd}[2]{\frac{\partial^3 #1}{\partial #2^3}}
+\newcommand{\pmix}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+\newcommand{\pmixx}[4]{\frac{\partial^3 #1}{\partial #2 \partial #3 \partial #4}}
+\newcommand{\funcd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\spaced}[2]{{\cal D}^{#1} #2}
+\newcommand{\totald}[2]{{D}^{#1} #2}
+
+\newcommand{\abs}[1]{\left\vert{#1}\right\vert}
+\newcommand{\od}[2]{\frac{d #1}{d #2}}
+\newcommand{\odd}[2]{\frac{d^2 #1}{d #2^2}}
+\newcommand{\R}{\mathbb{R}}
+
+\definecolor{lightgray}{rgb}{0.9,0.9,0.9}
+\definecolor{red}{rgb}{0.5,0.0,0.0}
+\definecolor{green}{rgb}{0.0,0.5,0.0}
+
+\lstset{language=C++,tabsize=2,backgroundcolor=\color{lightgray}}
+\lstset{frame=single}
+\lstset{basicstyle=\ttfamily\small}
+\lstset{commentstyle=\itshape}
+\end_preamble
+\options xcolor=dvipsnames
+\use_default_options true
+\begin_modules
+theorems-ams
+theorems-ams-extended
+\end_modules
+\language english
+\inputencoding auto
+\font_roman palatino
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\branch answers
+\selected 1
+\color #5555ff
+\end_branch
+\leftmargin 0.9in
+\topmargin 0.75in
+\rightmargin 0.9in
+\bottommargin 0.75in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Linear operators
+\end_layout
+
+\begin_layout Standard
+Linear operators are represented by the 
+\family typewriter
+LinearOperator
+\family default
+ class.
+ 
+\end_layout
+
+\begin_layout Subsection
+Matrices
+\end_layout
+
+\begin_layout Standard
+Construction of matrices is a several-step process.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Create a 
+\family typewriter
+MatrixFactory
+\family default
+ object
+\end_layout
+
+\begin_layout Enumerate
+Call member functions of the 
+\family typewriter
+MatrixFactory
+\family default
+ to configure the sparsity structure of the matrix 
+\end_layout
+
+\begin_layout Enumerate
+Call the createMatrix() member function of the 
+\family typewriter
+MatrixFactory
+\family default
+ to allocate the matrix
+\end_layout
+
+\begin_layout Enumerate
+Call member functions of the 
+\family typewriter
+LoadableMatrix
+\family default
+ interface to set values of the nonzero elements.
+\end_layout
+
+\begin_layout Standard
+If this seems complicated, it's because working with sparse matrices 
+\emph on
+is
+\emph default
+ complicated, and different sparse matrix implementations (there are several
+ just in Epetra) need to be constructed in different ways.
+ The MatrixFactory interface lets us hide the complexity of sparse matrix
+ construction behind a common interface.
+ 
+\end_layout
+
+\begin_layout Subsection
+Implicit operators
+\end_layout
+
+\begin_layout Standard
+We will frequently need to build operators out of simpler operators, without
+ explicitly forming matrices.
+ Several common types of implicit operators are described here.
+ 
+\end_layout
+
+\begin_layout Standard
+In the following examples it is assumed that operators 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ have been created by some function.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+LinearOperator<double> A = makeSomeMatrix();
+\end_layout
+
+\begin_layout Plain Layout
+
+LinearOperator<double> B = makeSomeOtherMatrix();
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Operator arithmetic
+\end_layout
+
+\begin_layout Standard
+The action of a composed operator 
+\begin_inset Formula $ABx$
+\end_inset
+
+ is computed implicitly by first computing 
+\begin_inset Formula $y=Bx$
+\end_inset
+
+, then computing 
+\begin_inset Formula $Ay.$
+\end_inset
+
+ There is no need to form the matrix 
+\begin_inset Formula $AB$
+\end_inset
+
+.
+ Similarly, 
+\begin_inset Formula $\left(A\pm B\right)x$
+\end_inset
+
+ can be evaluated implicitly by computing 
+\begin_inset Formula $y=Ax$
+\end_inset
+
+, 
+\begin_inset Formula $z=Bx$
+\end_inset
+
+, then doing 
+\begin_inset Formula $y\pm z$
+\end_inset
+
+.
+ Action of a scaled operator 
+\begin_inset Formula $\alpha Ax$
+\end_inset
+
+ is done implicitly as 
+\begin_inset Formula $\alpha\left(Ax\right)$
+\end_inset
+
+.
+ Any combination of these can be specified using overloaded operators, for
+ example:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+LinearOperator<double> C = A + B;
+\end_layout
+
+\begin_layout Plain Layout
+
+LinearOperator<double> D = 2.0*A - 0.5*B + 1.2*C;
+\end_layout
+
+\begin_layout Plain Layout
+
+LinearOperator<double> E = A*B;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Transposition
+\end_layout
+
+\begin_layout Standard
+Most good sparse matrix packages have the ability to compute 
+\begin_inset Formula $A^{T}x$
+\end_inset
+
+ without explicitly forming 
+\begin_inset Formula $A^{T}.$
+\end_inset
+
+ Given that, together with implicit composition, we can do 
+\begin_inset Formula $(AB)^{T}x=B^{T}A^{T}x$
+\end_inset
+
+ implicitly as well, and with implicit addition we can do 
+\begin_inset Formula $\left(A\pm B\right)^{T}x=A^{T}x\pm B^{T}x$
+\end_inset
+
+.
+ The 
+\family typewriter
+transposedOperator()
+\family default
+ function creates an operator object that knows to apply these rules.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+LinearOperator<double> At = transposedOperator(A);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Diagonal operators
+\end_layout
+
+\begin_layout Standard
+A diagonal operator can be represented with nothing but a vector of diagonal
+ elements.
+ To make a diagonal operator, call the 
+\family typewriter
+diagonalOperator()
+\family default
+ function with the vector to be put on the diagonal.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vector<double> d = makeSomeVector();
+\end_layout
+
+\begin_layout Plain Layout
+
+LinearOperator<double> D = diagonalOperator(d);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Zero operators
+\end_layout
+
+\begin_layout Standard
+Application of the zero operator returns the zero vector of the range space
+ of the operator.
+ To make a zero operator, call the
+\family typewriter
+ zeroOperator()
+\family default
+ function with arguments that specify the domain and range spaces of the
+ operator.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+LinearOperator<double> zero = zeroOperator(domain, range);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Identity operators
+\end_layout
+
+\begin_layout Standard
+The identity operator simply returns a copy of the operand.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+LinearOperator<double> I = identityOperator(space);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Implicit inverses
+\end_layout
+
+\begin_layout Standard
+The operation 
+\begin_inset Formula $y=A^{-1}x$
+\end_inset
+
+ is computed implicity by solving the system 
+\begin_inset Formula $Ay=x.$
+\end_inset
+
+ It is necessary to specify the solver algorithm that will be used to solve
+ the system.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+LinearOperator<double> AInv = inverse(A, solver);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Writing your own operator type
+\end_layout
+
+\begin_layout Standard
+Write your class to conform to the 
+\family typewriter
+SimplifiedLinearOpBase
+\family default
+ abstract interface, which basically means writing a member function that
+ applies the operator to a vector.
+ 
+\emph on
+To be written.
+\end_layout
+
+\begin_layout Subsection
+Block operators
+\end_layout
+
+\begin_layout Standard
+To be written
+\end_layout
+
+\begin_layout Subsection
+Access to matrix data
+\end_layout
+
+\begin_layout Standard
+You usually don't want to do this! Two exceptions are: row access for creating
+ certain preconditioners, and access to the diagonal for diagonal preconditionin
+g and other tricks.
+\end_layout
+
+\begin_layout Subsubsection
+Access to the nonzeros in a row
+\end_layout
+
+\begin_layout Subsubsection
+Access to values on the diagonal
+\end_layout
+
+\begin_layout Standard
+You can extract the diagonal from an operator 
+\begin_inset Formula $A$
+\end_inset
+
+ that is stored in Epetra form
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vector<double> d = getEpetraDiagonal(A);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Getting a lumped diagonal
+\end_layout
+
+\begin_layout Standard
+A lumped diagonal for 
+\begin_inset Formula $A$
+\end_inset
+
+ is a diagonal matrix 
+\begin_inset Formula $D$
+\end_inset
+
+ where 
+\begin_inset Formula $D_{ii}=\sum_{j=1}^{N}A_{ij}$
+\end_inset
+
+.
+ This can be done with high-level operations, as follows:
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vector<double> ones = A.domain().createMember();
+\end_layout
+
+\begin_layout Plain Layout
+
+ones.setToConstant(1.0);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Vector<double> rowSums = A*ones;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+LinearOperator<double> lump = diagonalOperator(rowSums);
+\end_layout
+
+\end_inset
+
+Because this involves multiplications as well as addition of matrix elements,
+ it is very slightly less efficient than a specialized row sum function.
+ However, not all sparse matrix implementations will have a row sum function,
+ but all will have a matrix-vector multiply, so the multiplication method
+ is a simple solution.
+ 
+\end_layout
+
+\begin_layout Standard
+This method of finding lumped diagonals is a special case of a more general
+ idea called probing, in which properties of a matrix are determined, or
+ at least estimated, through multiplications with a strategically-chosen
+ sequence of vectors.
+\end_layout
+
+\begin_layout Subsection
+Matrix-matrix operations
+\end_layout
+
+\begin_layout Subsubsection
+Matrix-matrix products
+\end_layout
+
+\begin_layout Standard
+Multiplication of matrices is expensive, and explicit calculation of 
+\begin_inset Formula $AB$
+\end_inset
+
+ should almost always be avoided if an implicit calculation of 
+\begin_inset Formula $ABx$
+\end_inset
+
+ will suffice.
+ However, in some cases there is no alternative but to form 
+\begin_inset Formula $AB$
+\end_inset
+
+ explicitly.
+ The function 
+\family typewriter
+epetraMatrixMatrixProduct
+\family default
+ will multiply two Epetra CRS matrices, returning the result (also stored
+ as an Epetra CRS matrix) as a LinearOperator.
+ This example does the operation 
+\begin_inset Formula $C=AB.$
+\end_inset
+
+ 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+LinearOperator<double> C = epetraMatrixMatrixProduct(A, B);
+\end_layout
+
+\end_inset
+
+An important special case where some performance optimizations are possible
+ is that of multiplication of a matrix 
+\begin_inset Formula $A$
+\end_inset
+
+ with a diagonal matrix 
+\begin_inset Formula $D$
+\end_inset
+
+.
+ The product 
+\begin_inset Formula $DA$
+\end_inset
+
+ is equivalent to scaling the rows of 
+\begin_inset Formula $A$
+\end_inset
+
+ by the corresponding diagonal entry of 
+\begin_inset Formula $D$
+\end_inset
+
+, whereas the product 
+\begin_inset Formula $AD$
+\end_inset
+
+ scales the columns.
+ The diagonal matrix 
+\begin_inset Formula $D$
+\end_inset
+
+ can be represented by a vector 
+\begin_inset Formula $d$
+\end_inset
+
+ containing its diagonal elements.
+ The computation of 
+\begin_inset Formula $DA$
+\end_inset
+
+ is done as shown: 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+LinearOperator<double> DA = epetraLeftScale(d, A);
+\end_layout
+
+\end_inset
+
+The matrix 
+\begin_inset Formula $A$
+\end_inset
+
+ is unchanged.
+ Calculation of 
+\begin_inset Formula $AD$
+\end_inset
+
+ is, similarly,
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+LinearOperator<double> AD = epetraRightScale(A,d );
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Matrix-matrix sums
+\end_layout
+
+\begin_layout Standard
+Explicit matrix-matrix addition is done with the function epetraMatrixMatrixSum
+ as follows:
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+LinearOperator<double> APlusB = epetraMatrixMatrixSum(A, B);
+\end_layout
+
+\end_inset
+
+The two operands must have compatible shapes, but need not have the same
+ sparsity graph.
+\end_layout
+
+\begin_layout Subsubsection
+Explicit diagonal matrix formation
+\end_layout
+
+\begin_layout Standard
+If for some reason you need to work with an explicit Epetra matrix representatio
+n of a diagonal operator, you can create one from a 
+\family typewriter
+Vector
+\family default
+ 
+\begin_inset Formula $d$
+\end_inset
+
+ as shown
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+LinearOperator<double> D = makeEpetraDiagonalMatrix(d);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

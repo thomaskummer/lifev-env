@@ -1,0 +1,589 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass extarticle
+\begin_preamble
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\fdo}[1]{\mathcal{D}_{#1}}
+\newcommand{\sdo}[1]{D_{#1}}
+\newcommand{\tdo}[1]{D_{#1}}
+\newcommand{\fd}[2]{\fdo{#1} #2}
+\newcommand{\sd}[2]{\sdo{#1} #2}
+\newcommand{\td}[2]{\tdo{#1} #2}
+\newcommand{\pdd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pddd}[2]{\frac{\partial^3 #1}{\partial #2^3}}
+\newcommand{\pmix}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+\newcommand{\pmixx}[4]{\frac{\partial^3 #1}{\partial #2 \partial #3 \partial #4}}
+\newcommand{\funcd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\spaced}[2]{{\cal D}^{#1} #2}
+\newcommand{\totald}[2]{{D}^{#1} #2}
+
+\newcommand{\abs}[1]{\left\vert{#1}\right\vert}
+\newcommand{\od}[2]{\frac{d #1}{d #2}}
+\newcommand{\odd}[2]{\frac{d^2 #1}{d #2^2}}
+\newcommand{\R}{\mathbb{R}}
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams
+theorems-ams-extended
+\end_modules
+\language english
+\inputencoding auto
+\font_roman palatino
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\branch answers
+\selected 1
+\color #5555ff
+\end_branch
+\leftmargin 0.9in
+\topmargin 0.75in
+\rightmargin 0.9in
+\bottommargin 0.75in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+TSF to Playa transition
+\end_layout
+
+\begin_layout Author
+Kevin Long
+\end_layout
+
+\begin_layout Section
+Various name changes
+\end_layout
+
+\begin_layout Standard
+Most of the name changes can be automated using the script 
+\family typewriter
+changeNames.sh.
+
+\family default
+ For example, to change the names of all files in the current directory,
+ run
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+[PATH-TO-TRILINOS]/packages/Sundance/Playa/maintenance/changeNames.sh *.cpp
+ *.hpp
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Some manual changes may be needed, particularly those described in 1.2.
+\end_layout
+
+\begin_layout Subsection
+Bye bye TSF
+\end_layout
+
+\begin_layout Standard
+This script will change the namespace name 
+\family typewriter
+TSFExtended
+\family default
+ to 
+\family typewriter
+Playa
+\family default
+ throughout, and will change include directives such as
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+#include "TSFVectorDecl.hpp"
+\end_layout
+
+\end_inset
+
+to
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+#include "PlayaVectorDecl.hpp"
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Class namespace changes
+\end_layout
+
+\begin_layout Standard
+Classes Printable, Tabs, Handleable, and Handle have all been moved from
+ the Sundance namespace to the Playa namespace.
+ Likewise, the names of their header files have been changed from SundanceTabs.hp
+p to PlayaTabs.hpp, etc.
+ Much of this renaming can be done by the script, but because most files
+ using, 
+\emph on
+e.g.
+\emph default
+, 
+\family typewriter
+Tabs
+\family default
+ had assumed the namespace Sundance, you may need to do one of the following
+ edits manually: 
+\end_layout
+
+\begin_layout Enumerate
+Add whichever of 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+using Playa::Tabs;
+\end_layout
+
+\begin_layout Plain Layout
+
+using Playa::Out;
+\end_layout
+
+\begin_layout Plain Layout
+
+using Playa::Handle;
+\end_layout
+
+\begin_layout Plain Layout
+
+using Playa::Handleable;
+\end_layout
+
+\end_inset
+
+are needed in each file.
+\end_layout
+
+\begin_layout Enumerate
+Change 
+\family typewriter
+Tabs, Out, Handle,
+\family default
+ and 
+\family typewriter
+Handleable
+\family default
+ to 
+\family typewriter
+Playa::Tabs
+\family default
+, etc.
+\end_layout
+
+\begin_layout Enumerate
+Add 
+\family typewriter
+using namespace Playa;
+\family default
+ to each source file affected (not recommended)
+\end_layout
+
+\begin_layout Subsubsection
+NOX sub-namespaces
+\end_layout
+
+\begin_layout Standard
+The namespaces NOX::TSF or NOX::Playa should be changed to NOX::NOXPlaya.
+ 
+\end_layout
+
+\begin_layout Subsection
+Header file name changes
+\end_layout
+
+\begin_layout Standard
+The header files
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+NOX_Playa_Group.H              
+\end_layout
+
+\begin_layout Plain Layout
+
+NOX_Playa_Vector.H 
+\end_layout
+
+\begin_layout Plain Layout
+
+NOX_Playa.H                    
+\end_layout
+
+\begin_layout Plain Layout
+
+NOX_StatusTest_SafeCombo.H 
+\end_layout
+
+\begin_layout Plain Layout
+
+NOX_Playa_StatusTestBuilder.H  
+\end_layout
+
+\begin_layout Plain Layout
+
+PlayaNOXSolver.H 
+\end_layout
+
+\end_inset
+
+have had their extensions changed from 
+\family typewriter
+.H
+\family default
+ to 
+\family typewriter
+.hpp
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+Change 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+#include "PlayaBlockVectorSpaceDecl.hpp"
+\end_layout
+
+\begin_layout Plain Layout
+
+#include "PlayaBlockVectorSpaceImpl.hpp"
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+to
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+#include "PlayaDefaultBlockVectorSpaceDecl.hpp"
+\end_layout
+
+\begin_layout Plain Layout
+
+#include "PlayaDefaultBlockVectorSpaceImpl.hpp"
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Function name changes
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Old
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+New
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+VectorSpace<S>::lowestLocallyOwnedIndex()
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+VectorSpace<S>::baseGlobalNaturalIndex()
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+productSpace(...)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+blockSpace(...)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ObjectWithVerbosity::setVerbosity()
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ObjectWithVerbosity::setVerb()
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Element access
+\end_layout
+
+\begin_layout Subsection
+Bracket operators
+\end_layout
+
+\begin_layout Standard
+The vector bracket operators expect local indices.
+ 
+\end_layout
+
+\begin_layout Subsection
+get/setElement functions
+\end_layout
+
+\begin_layout Standard
+In order to reduce the confusing redundancy in element access functions,
+ the getElement() and setElement() functions have been removed.
+ If you use them, they should be replaced as follows:
+\end_layout
+
+\begin_layout Itemize
+Access involving local elements only should be done through the bracket
+ operators using local indices, supplemented by block iterators if needed.
+ This is sufficient for any elementwise functions.
+ 
+\end_layout
+
+\begin_layout Itemize
+Reading global elements should be done through the GhostView interface.
+ A solver developer will almost never need to do this.
+\end_layout
+
+\begin_layout Itemize
+Setting global elements should be done through the LoadableVector interface.
+ A solver developer will almost never need to do this.
+\end_layout
+
+\begin_layout Subsection
+LoadableVector interface
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+LoadableVector
+\family default
+ methods expect global indices.
+\end_layout
+
+\begin_layout Standard
+If you want high-performance vector element loading, it's best to dynamic
+ cast the vector's pointer to a LoadableVector pointer before beginning
+ the fill loop.
+ A quick (for the programmer) and dirty (for the computer) shortcut is to
+ use the 
+\family typewriter
+loadable
+\family default
+ function as follows:
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vector<double> x = getSomeVector();
+\end_layout
+
+\begin_layout Plain Layout
+
+for (int g=low; g<high; g++) loadable(x)->setElement(g, val);
+\end_layout
+
+\end_inset
+
+This does a dynamic cast in the inner loop and so will be slow, but it's
+ an easy shortcut if you want to keep your code looking clean.
+ 
+\end_layout
+
+\begin_layout Subsection
+Ghost (off-processor) elements
+\end_layout
+
+\begin_layout Standard
+Read-only access to selected off-processor elements is done through the
+ 
+\family typewriter
+GhostView
+\family default
+ interface.
+ The methods of 
+\family typewriter
+GhostView
+\family default
+ expect global indices.
+\end_layout
+
+\begin_layout Section
+Solver changes
+\end_layout
+
+\begin_layout Standard
+To support old XML solver parameter files, the linear solver builder recognizes
+ solver type name 
+\family typewriter
+TSF
+\family default
+ as equivalent to solver type name 
+\family typewriter
+Playa
+\family default
+.
+ 
+\end_layout
+
+\begin_layout Section
+Removed features
+\end_layout
+
+\begin_layout Enumerate
+Support for partitioned BCs has been removed.
+ This had gone untested due to various Thyra limitations, and the need has
+ been superseded by the use of Nitsche BCs.
+ It can be put back in if needed.
+\end_layout
+
+\begin_layout Enumerate
+The 
+\family typewriter
+SequentialIterator
+\family default
+ object has been removed.
+ It has been superseded by the combination of block iterators and bracket
+ operators on local indices.
+\end_layout
+
+\begin_layout Enumerate
+The TSF GMRES solver has been removed.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Thyra interoperability is gone for now.
+ It can be added should the need arise.
+\end_layout
+
+\end_body
+\end_document

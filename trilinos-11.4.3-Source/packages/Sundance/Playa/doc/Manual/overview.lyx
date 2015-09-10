@@ -1,0 +1,1194 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{color}
+\usepackage{moreverb}
+
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\fdo}[1]{\mathcal{D}_{#1}}
+\newcommand{\sdo}[1]{D_{#1}}
+\newcommand{\tdo}[1]{D_{#1}}
+\newcommand{\fd}[2]{\fdo{#1} #2}
+\newcommand{\sd}[2]{\sdo{#1} #2}
+\newcommand{\td}[2]{\tdo{#1} #2}
+\newcommand{\pdd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pddd}[2]{\frac{\partial^3 #1}{\partial #2^3}}
+\newcommand{\pmix}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+\newcommand{\pmixx}[4]{\frac{\partial^3 #1}{\partial #2 \partial #3 \partial #4}}
+\newcommand{\funcd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\spaced}[2]{{\cal D}^{#1} #2}
+\newcommand{\totald}[2]{{D}^{#1} #2}
+
+\newcommand{\abs}[1]{\left\vert{#1}\right\vert}
+\newcommand{\od}[2]{\frac{d #1}{d #2}}
+\newcommand{\odd}[2]{\frac{d^2 #1}{d #2^2}}
+\newcommand{\R}{\mathbb{R}}
+
+\definecolor{lightgray}{rgb}{0.9,0.9,0.9}
+\definecolor{red}{rgb}{0.5,0.0,0.0}
+\definecolor{green}{rgb}{0.0,0.5,0.0}
+
+\lstset{language=C++,tabsize=2,backgroundcolor=\color{lightgray}}
+\lstset{frame=single}
+\lstset{basicstyle=\ttfamily\small}
+\lstset{commentstyle=\itshape}
+\end_preamble
+\options xcolor=dvipsnames
+\use_default_options true
+\begin_modules
+theorems-ams
+theorems-ams-extended
+\end_modules
+\language english
+\inputencoding auto
+\font_roman palatino
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\branch answers
+\selected 1
+\color #5555ff
+\end_branch
+\leftmargin 0.9in
+\topmargin 0.75in
+\rightmargin 0.9in
+\bottommargin 0.75in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Overview
+\end_layout
+
+\begin_layout Standard
+Most of the work in scientific computing involves operations with matrices
+ and vectors.
+ If you've programmed in Matlab, you'll have learned that it's a good idea
+ -- for both efficiency and human readability -- to work with matrices and
+ vectors as 
+\begin_inset Quotes eld
+\end_inset
+
+objects
+\begin_inset Quotes erd
+\end_inset
+
+ rather than doing operations by looping over indices.
+ There are no built-in matrix and vector types in C++, but one can write
+ classes to represent matrices and vectors.
+ 
+\end_layout
+
+\begin_layout Standard
+It's important to understand that in PDE simulation we will be forming systems
+ of linear equations that are both very large and very sparse.
+ The data structures for the matrices and vectors involved are fairly complicate
+d, and the best choice of solution algorithm will depend strongly on the
+ specific problem.
+ There are a number of subpackages within Trilinos for doing sparse data
+ structures and sparse solves.
+ These in turn depend on lower-level libraries for dense linear algebra
+ (LAPACK and BLAS) and for parallel communication (MPI).
+ To provide a consistent and convenient user interface we 
+\begin_inset Quotes eld
+\end_inset
+
+wrap
+\begin_inset Quotes erd
+\end_inset
+
+ those capabilities in a suite of higher-level objects.
+ This three-layer structure is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:LA-Schematic"
+
+\end_inset
+
+.
+ Most of the time you'll work with the highest-level objects; occasionally
+ you might need to delve into the Trilinos mid-level objects if you want
+ some customized behavior.
+ Should you need to work with the mid-level objects, all of the Trilinos
+ libraries have Doxygen documentation available.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename LA-diagram.pdf
+	scale 50
+	clip
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Schematic of relationship between high-level Playa linear algebra interface,
+ mid-level Trilinos libraries for sparse linear algebra, and low-level BLAS,
+ LAPACK, and MPI.
+ The Playa linear algebra objects make it possible to write efficient code
+ using high-level notation such as 
+\begin_inset Formula $x=y+A^{-1}b$
+\end_inset
+
+.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:LA-Schematic"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Principal user-level objects
+\end_layout
+
+\begin_layout Itemize
+The
+\family typewriter
+ VectorType 
+\family default
+class is responsible for creating 
+\family typewriter
+VectorSpace
+\family default
+ objects of a specified size and distribution over processors.
+ For example, the
+\family typewriter
+ EpetraVectorType
+\family default
+ subclass specifies that vectors will be stored as Epetra data structures.
+ Note that 
+\begin_inset Quotes eld
+\end_inset
+
+vector type
+\begin_inset Quotes erd
+\end_inset
+
+ is not a mathematical object in the sense that vector spaces and vectors
+ are; rather, it is a concept that lets us specify what 
+\emph on
+low-level software implementation
+\emph default
+ of vectors, spaces, and operators will be used.
+ 
+\end_layout
+
+\begin_layout Itemize
+The 
+\family typewriter
+VectorSpace
+\family default
+ class is responsible for creating vectors.
+ This is done using the 
+\family typewriter
+createMember()
+\family default
+ function.
+ 
+\family typewriter
+VectorSpace
+\family default
+ and 
+\family typewriter
+VectorType
+\family default
+ are both examples of the 
+\emph on
+abstract factory
+\emph default
+ design pattern; an abstract factory is a software design trick that provides
+ a common interface for creating objects, specific implementations of which
+ might be constructed in very different ways.
+ 
+\end_layout
+
+\begin_layout Itemize
+The 
+\family typewriter
+Vector
+\family default
+ class represents vectors.
+ Two compatible (
+\emph on
+i.e.
+\emph default
+, both from the same vector space) vectors can be added and subtracted with
+ the 
+\begin_inset Formula $+$
+\end_inset
+
+ and 
+\begin_inset Formula $-$
+\end_inset
+
+ operators.
+ The 
+\begin_inset Formula $*$
+\end_inset
+
+ operator between two vectors does the dot product.
+ Other operations such as various norms, Hadamard products, various operations
+ involving scalars, and element access are described in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Vector-operations"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Itemize
+The 
+\family typewriter
+LinearOperator
+\family default
+ class represents linear operators.
+ However, many operators can be implemented 
+\begin_inset Quotes eld
+\end_inset
+
+matrix free,
+\begin_inset Quotes erd
+\end_inset
+
+ meaning it is not necessary to store any matrix elements.
+ For example, while the identity operator has a matrix representation, it
+ is inefficient to go through a matrix-vector multiplication when the assigment
+ 
+\begin_inset Formula $x\leftarrow Iy$
+\end_inset
+
+ can be effected by simply copying 
+\begin_inset Formula $y$
+\end_inset
+
+ into 
+\begin_inset Formula $x$
+\end_inset
+
+.
+ Thus, an identity operator isn't implemented as a matrix, it's simply an
+ instruction to copy the input directly into the output.
+ 
+\end_layout
+
+\begin_layout Itemize
+The 
+\family typewriter
+LinearSolver
+\family default
+ class represents algorithms for solving linear equations.
+ 
+\end_layout
+
+\begin_layout --Separator--
+
+\end_layout
+
+\begin_layout Standard
+All of these classes are templated on the scalar type, for instance, 
+\family typewriter
+Vector<double>
+\family default
+ or 
+\family typewriter
+Vector<float>.
+ 
+\family default
+The Sundance PDE discretization capabilities are presently hardwired to
+ double-precision real numbers, so we'll use 
+\family typewriter
+Vector<double>
+\family default
+ in all examples.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Handles, deep and shallow copies
+\end_layout
+
+\begin_layout Standard
+The five principal classes, VectorType, VectorSpace, Vector, LinearOperator,
+ and LinearSolver are all implemented as 
+\emph on
+reference-counted handles.
+ 
+\emph default
+An important consequence of that fact is that copies are 
+\begin_inset Quotes eld
+\end_inset
+
+shallow
+\begin_inset Quotes erd
+\end_inset
+
+.
+ That means that an assignment such as
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vector<double> x = someSpace.createMember();
+\end_layout
+
+\begin_layout Plain Layout
+
+Vector<double> y = x;
+\end_layout
+
+\end_inset
+
+does not create a new copy of the vector 
+\begin_inset Formula $x$
+\end_inset
+
+, complete with new data.
+ Rather, it creates a new 
+\begin_inset Quotes eld
+\end_inset
+
+handle
+\begin_inset Quotes erd
+\end_inset
+
+ to the same data.
+ One advantage of this is obvious: vectors can be large, so we want to avoid
+ making unnecessary copies.
+ But note that any modification to 
+\begin_inset Formula $y$
+\end_inset
+
+ will also trigger the same modification to 
+\begin_inset Formula $x$
+\end_inset
+
+, because 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ are referring to 
+\emph on
+exactly the same data in memory.
+
+\emph default
+ The potential for confusion and unintended side effects is obvious.
+ Less obvious is that in certain important circumstances, such side effects
+ are exactly what is needed for a clean user interface to efficient low-level
+ code.
+\end_layout
+
+\begin_layout Standard
+Should you want to make a 
+\begin_inset Quotes eld
+\end_inset
+
+deep
+\begin_inset Quotes erd
+\end_inset
+
+ copy of a vector, in which the copy has its own data and is fully independent
+ of the original, use the copy() member function.
+ 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vector<double> x = someSpace.createMember();
+\end_layout
+
+\begin_layout Plain Layout
+
+x.setToConstant(1.0);
+\end_layout
+
+\begin_layout Plain Layout
+
+Vector<double> y = x;
+\end_layout
+
+\begin_layout Plain Layout
+
+Vector<double> z = x.copy();
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+At this point 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ are two 
+\begin_inset Quotes eld
+\end_inset
+
+handles
+\begin_inset Quotes erd
+\end_inset
+
+ to the same underlying vector, whereas 
+\begin_inset Formula $z$
+\end_inset
+
+ is a vector that has, for now, the same elements as 
+\begin_inset Formula $x$
+\end_inset
+
+.
+ Now modify 
+\begin_inset Formula $x$
+\end_inset
+
+ 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+x.setToConstant(5.0);
+\end_layout
+
+\end_inset
+
+and print norms of the three vectors
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Out::root() << "||x|| = " << x.norm2() << endl;
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::root() << "||y|| = " << y.norm2() << endl;
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::root() << "||z|| = " << z.norm2() << endl;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The norms of 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ are consistent with the updated value even though the variable 
+\begin_inset Formula $y$
+\end_inset
+
+ has never been 
+\emph on
+directly
+\emph default
+ modified.
+ The norm of 
+\begin_inset Formula $z$
+\end_inset
+
+ remains consistent with the original value of the vector 
+\begin_inset Formula $x$
+\end_inset
+
+, because modifications to 
+\begin_inset Formula $x$
+\end_inset
+
+ are not propagated to its deep copies.
+\end_layout
+
+\begin_layout Subsubsection
+\begin_inset CommandInset label
+LatexCommand label
+name "exa:CG"
+
+\end_inset
+
+Example: A conjugate gradient solver
+\end_layout
+
+\begin_layout Standard
+Here we show how these objects are used to write a simple conjugate gradient
+ algorithm and apply it to finite-difference solution of the Poisson equation
+ in 1D.
+ The creation of the finite-difference matrix is assumed to be done by a
+ function 
+\family typewriter
+buildFDPoisson1D()
+\family default
+.
+ We don't show the details of the matrix creation function here; filling
+ matrices is low-level code that Sundance will usually hide from you.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+int numPerProc = 20;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+VectorType<double> vecType = new EpetraVectorType();
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+LinearOperator<double> A = buildFDPoisson1D(vecType, numPerProc);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::root() << "Matrix A = " << endl; // print header on root processor
+ only    
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::os() << A << endl;               // print matrix data on all processors
+\end_layout
+
+\end_inset
+
+Having created the matrix, we now make a vector of compatible size and fill
+ it with values.
+ We'll use this as the RHS of 
+\begin_inset Formula $Ax=b.$
+\end_inset
+
+
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+VectorSpace<double> space = A.domain();     
+\end_layout
+
+\begin_layout Plain Layout
+
+Vector<double> b = space.createMember();
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+b.setToConstant(1.0);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::root() << "Vector b = " << endl; // print header on root processor
+ only    
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::os() << b << endl;               // print matrix data on all processors
+\end_layout
+
+\end_inset
+
+Now we write the CG algorithm.
+ For simplicity, error checking is omitted.
+ 
+\begin_inset listings
+lstparams "tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vector<double> x = b.copy(); // NOT x=b, which would be a shallow copy
+\end_layout
+
+\begin_layout Plain Layout
+
+Vector<double> r = b - A*x;     
+\end_layout
+
+\begin_layout Plain Layout
+
+Vector<double> p = r.copy();
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+double tol = 1.0e-12;     
+\end_layout
+
+\begin_layout Plain Layout
+
+int maxIter = 100;
+\end_layout
+
+\begin_layout Plain Layout
+
+   
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::root() << "Running CG" << endl;     
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::root() << "tolerance = " << tol << endl;     
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::root() << "max iters = " << maxIter << endl;     
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::root() << "---------------------------------------------------" <<
+ endl;          
+\end_layout
+
+\begin_layout Plain Layout
+
+for (int i=0; i<maxIter; i++)
+\end_layout
+
+\begin_layout Plain Layout
+
+{       
+\end_layout
+
+\begin_layout Plain Layout
+
+	Vector<double> Ap = A*p; // save this, because we'll use it twice
+\end_layout
+
+\begin_layout Plain Layout
+
+	double rSqOld = r*r;       
+\end_layout
+
+\begin_layout Plain Layout
+
+	double pAp = p*Ap;       
+\end_layout
+
+\begin_layout Plain Layout
+
+	double alpha = rSqOld/pAp;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	x = x + alpha*p;       
+\end_layout
+
+\begin_layout Plain Layout
+
+	r = r - alpha*Ap;
+\end_layout
+
+\begin_layout Plain Layout
+
+             
+\end_layout
+
+\begin_layout Plain Layout
+
+	double rSq = r*r;       
+\end_layout
+
+\begin_layout Plain Layout
+
+	double rNorm = sqrt(rSq);       
+\end_layout
+
+\begin_layout Plain Layout
+
+	Out::root() << "iter=" << setw(6) << i << setw(20) << rNorm << endl;  
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	if (rNorm < tol) break;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	double beta = rSq/rSqOld;
+\end_layout
+
+\begin_layout Plain Layout
+
+	p = r + beta*p;     
+\end_layout
+
+\begin_layout Plain Layout
+
+}     
+\end_layout
+
+\end_inset
+
+Upon exiting the CG loop, print the solution.
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Out::root() << "Solution: " << endl;
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::os() << x << endl;
+\end_layout
+
+\end_inset
+
+An industrial-strength CG solver would need preconditioning and error checking,
+ and could be packaged up as a 
+\family typewriter
+LinearSolver
+\family default
+ object.
+\end_layout
+
+\begin_layout Subsubsection
+Example: Inverse power iteration
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Example:-Inverse-power"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Next we show code for calculation of the lowest eigenvalue of a matrix 
+\begin_inset Formula $A$
+\end_inset
+
+ by applying the power method to 
+\begin_inset Formula $A^{-1}$
+\end_inset
+
+.
+ The most important feature to look for in this example is the use of an
+ implicit inverse operator.
+ It's rarely a good idea to compute the matrix 
+\begin_inset Formula $A^{-1}$
+\end_inset
+
+, so we want to avoid that.
+ Instead, we create an 
+\emph on
+implicit inverse operator
+\emph default
+ that evaluates 
+\begin_inset Formula $A^{-1}y$
+\end_inset
+
+ by using a LinearSolver object to solve the system 
+\begin_inset Formula $Ax=y$
+\end_inset
+
+.
+ Linear solvers are complicated enough that we'll usually build them by
+ reading parameters from a file.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+#include "Playa.hpp" 
+\end_layout
+
+\begin_layout Plain Layout
+
+#include "FDMatrixPoisson1D.hpp"
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+int main(int argc, char** argv) 
+\end_layout
+
+\begin_layout Plain Layout
+
+{   
+\end_layout
+
+\begin_layout Plain Layout
+
+	try   
+\end_layout
+
+\begin_layout Plain Layout
+
+	{     
+\end_layout
+
+\begin_layout Plain Layout
+
+		Playa::init(&argc, &argv);
+\end_layout
+
+\begin_layout Plain Layout
+
+    	
+\end_layout
+
+\begin_layout Plain Layout
+
+		int numPerProc = 1000;
+\end_layout
+
+\begin_layout Plain Layout
+
+		VectorType<double> vecType = new EpetraVectorType();
+\end_layout
+
+\begin_layout Plain Layout
+
+		LinearOperator<double> A = buildFDPoisson1D(vecType, numPerProc);
+\end_layout
+
+\begin_layout Plain Layout
+
+		VectorSpace<double> space = A.domain();     
+\end_layout
+
+\begin_layout Plain Layout
+
+		
+\end_layout
+
+\begin_layout Plain Layout
+
+		Vector<double> x = space.createMember();
+\end_layout
+
+\begin_layout Plain Layout
+
+		x.setToConstant(1.0);
+\end_layout
+
+\begin_layout Plain Layout
+
+		
+\end_layout
+
+\begin_layout Plain Layout
+
+		LinearSolver<double> solver      = 
+\end_layout
+
+\begin_layout Plain Layout
+
+			LinearSolverBuilder::createSolver("amesos.xml");
+\end_layout
+
+\begin_layout Plain Layout
+
+		LinearOperator<double> AInv = inverse(A, solver);
+\end_layout
+
+\begin_layout Plain Layout
+
+    	
+\end_layout
+
+\begin_layout Plain Layout
+
+		int maxIters = 100;     
+\end_layout
+
+\begin_layout Plain Layout
+
+		double tol = 1.0e-12;
+\end_layout
+
+\begin_layout Plain Layout
+
+    	double mu;     
+\end_layout
+
+\begin_layout Plain Layout
+
+		double muPrev = 0.0;
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+		for (int i=0; i<maxIters; i++)     
+\end_layout
+
+\begin_layout Plain Layout
+
+		{      
+\end_layout
+
+\begin_layout Plain Layout
+
+			Vector<double> AInvX = AInv*x;       
+\end_layout
+
+\begin_layout Plain Layout
+
+			mu = (x*AInvX)/(x*x);       
+\end_layout
+
+\begin_layout Plain Layout
+
+			Out::os() << "Iter " << setw(5) << i 
+\end_layout
+
+\begin_layout Plain Layout
+
+				<< setw(25) << setprecision(10) << mu << endl;       
+\end_layout
+
+\begin_layout Plain Layout
+
+			if (fabs(mu-muPrev) < tol) break;       
+\end_layout
+
+\begin_layout Plain Layout
+
+			muPrev = mu;       
+\end_layout
+
+\begin_layout Plain Layout
+
+			double AInvXNorm = AInvX.norm2();       
+\end_layout
+
+\begin_layout Plain Layout
+
+			x = 1.0/AInvXNorm * AInvX;     
+\end_layout
+
+\begin_layout Plain Layout
+
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+		Out::root() << "Lowest eigenvalue " 
+\end_layout
+
+\begin_layout Plain Layout
+
+			<< setw(25) << setprecision(10) << 1.0/mu << endl;
+\end_layout
+
+\begin_layout Plain Layout
+
+	} 
+\end_layout
+
+\begin_layout Plain Layout
+
+	catch(exception& e)
+\end_layout
+
+\begin_layout Plain Layout
+
+	{ 
+\end_layout
+
+\begin_layout Plain Layout
+
+		Playa::handleException(e);  
+\end_layout
+
+\begin_layout Plain Layout
+
+	}   
+\end_layout
+
+\begin_layout Plain Layout
+
+	Playa::finalize();  
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Both examples have concentrated on the 
+\emph on
+use
+\emph default
+ of matrix and vector objects rather than the 
+\emph on
+creation
+\emph default
+ of these objects.
+ Sundance will automatically build matrices for rather complicated problems,
+ and you'll rarely need to create matrices yourself.
+ However, in writing advanced preconditioning, optimization, and solver
+ algorithms you'll need to compose implicit operations.
+ 
+\end_layout
+
+\end_body
+\end_document

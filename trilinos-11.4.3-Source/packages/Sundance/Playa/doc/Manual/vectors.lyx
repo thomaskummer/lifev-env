@@ -1,0 +1,1028 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{color}
+\usepackage{moreverb}
+
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\fdo}[1]{\mathcal{D}_{#1}}
+\newcommand{\sdo}[1]{D_{#1}}
+\newcommand{\tdo}[1]{D_{#1}}
+\newcommand{\fd}[2]{\fdo{#1} #2}
+\newcommand{\sd}[2]{\sdo{#1} #2}
+\newcommand{\td}[2]{\tdo{#1} #2}
+\newcommand{\pdd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pddd}[2]{\frac{\partial^3 #1}{\partial #2^3}}
+\newcommand{\pmix}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+\newcommand{\pmixx}[4]{\frac{\partial^3 #1}{\partial #2 \partial #3 \partial #4}}
+\newcommand{\funcd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\spaced}[2]{{\cal D}^{#1} #2}
+\newcommand{\totald}[2]{{D}^{#1} #2}
+
+\newcommand{\abs}[1]{\left\vert{#1}\right\vert}
+\newcommand{\od}[2]{\frac{d #1}{d #2}}
+\newcommand{\odd}[2]{\frac{d^2 #1}{d #2^2}}
+\newcommand{\R}{\mathbb{R}}
+
+\definecolor{lightgray}{rgb}{0.9,0.9,0.9}
+\definecolor{red}{rgb}{0.5,0.0,0.0}
+\definecolor{green}{rgb}{0.0,0.5,0.0}
+
+\lstset{language=C++,tabsize=2,backgroundcolor=\color{lightgray}}
+\lstset{frame=single}
+\lstset{basicstyle=\ttfamily\small}
+\lstset{commentstyle=\itshape}
+\end_preamble
+\options xcolor=dvipsnames
+\use_default_options true
+\begin_modules
+theorems-ams
+theorems-ams-extended
+\end_modules
+\language english
+\inputencoding auto
+\font_roman palatino
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\branch answers
+\selected 1
+\color #5555ff
+\end_branch
+\leftmargin 0.9in
+\topmargin 0.75in
+\rightmargin 0.9in
+\bottommargin 0.75in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Vectors
+\end_layout
+
+\begin_layout Standard
+We now move on from the high-level overview to a discussion of the types
+ and capabilities of vectors.
+\end_layout
+
+\begin_layout Subsection
+Creation of vectors
+\end_layout
+
+\begin_layout Standard
+You will rarely call a vector constructor directly; the reason for this
+ is that different vector libraries have different data requirements making
+ it difficult to .
+ Instead, vectors are built indirectly by calling the 
+\family typewriter
+createMember()
+\family default
+ member function of 
+\family typewriter
+VectorSpace
+\family default
+.
+ Each 
+\family typewriter
+VectorSpace
+\family default
+ object contains the data needed to build vector objects, and the implementation
+ of the 
+\family typewriter
+createMember()
+\family default
+ function will use that data to invoke a constructor call.
+ 
+\end_layout
+
+\begin_layout Subsection
+Vector operations
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Vector-operations"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Overloaded binary operations
+\end_layout
+
+\begin_layout Standard
+The standard binary operations 
+\begin_inset Formula $\mathbf{a\pm b}$
+\end_inset
+
+, 
+\begin_inset Formula $\alpha\mathbf{a}$
+\end_inset
+
+, and 
+\begin_inset Formula $\mathbf{a\cdot b}$
+\end_inset
+
+ are implemented via operator overloading.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="5">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="bottom" width="0">
+<column alignment="center" valignment="bottom" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Left operand
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Operator
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Right operand
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Return type
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Restrictions
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+a
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
++
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+b
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+Vector
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+Operands must be members of the same vector space
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+a
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+b
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+Vector
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+Operands must be members of the same vector space
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+alpha
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+*
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+a
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+Vector
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+a
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+*
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+b
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+Scalar
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+Operands must be members of the same vector space
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These operations can be combined in any way that makes mathematical sense,
+ for example:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vector<double> v = 2.0*a - 4.0*b + (a*b)*c;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the operation 
+\family typewriter
+(a*b)*c
+\family default
+ obeys the rules of precedence, so that the vector 
+\begin_inset Formula $\mathbf{c}$
+\end_inset
+
+ is multiplied by the scalar 
+\begin_inset Formula $\mathbf{a\cdot b}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Unary vector-valued operations
+\end_layout
+
+\begin_layout Standard
+The following functions operate elementwise on a vector, returning a new
+ vector as a result.
+ The original vector is unchanged.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Operation
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Notes
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+reciprocal()
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+If any element is zero, a runtime exception will be thrown
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+abs()
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+copy()
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Makes a 
+\begin_inset Quotes eld
+\end_inset
+
+deep
+\begin_inset Quotes erd
+\end_inset
+
+ copy of a vector
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vector<double> w = v.reciprocal();
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Norms and other reduction operations
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Operation
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Notes
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+norm1()
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Computes 
+\begin_inset Formula $\left\Vert x\right\Vert _{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+norm2()
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Computes 
+\begin_inset Formula $\left\Vert x\right\Vert _{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+normInf()
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Computes 
+\begin_inset Formula $\left\Vert x\right\Vert _{\infty}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+max()
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Largest element of 
+\begin_inset Formula $x$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+min()
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Smallest element of 
+\begin_inset Formula $x$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Formula $x=\left(\begin{array}{ccccc}
+-1 & 0 & 0 & 1 & 2\end{array}\right)$
+\end_inset
+
+ then 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Out::os() << x.norm1() << endl;   // prints 4
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::os() << x.norm2() << endl;   // prints sqrt(6)
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::os() << x.normInf() << endl; // prints 2
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::os() << x.max()     << endl; // prints 2
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::os() << x.min()     << endl; // prints -1
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Also, there are methods to return the location of the minimum and maximum
+ (used in algorithms for constrained optimization, to find the nearest constrain
+t).
+ Write these up later.
+ 
+\end_layout
+
+\begin_layout Subsection
+Block vectors
+\end_layout
+
+\begin_layout Standard
+To be written
+\end_layout
+
+\begin_layout Subsection
+Access to vector elements
+\end_layout
+
+\begin_layout Standard
+Before working directly with vector elements, stop to ask whether it's really
+ necessary.
+ Most numerical algorithms don't require access to vector elements.
+ For instance, a conjugate gradient solver uses only vector addition, multiplica
+tion of a vector by a scalar, and the inner product between vectors.
+ All of these can be carried out using member functions of 
+\family typewriter
+Vector
+\family default
+ with no need for element access.
+ There are two cases in which you may need element access:
+\end_layout
+
+\begin_layout Itemize
+If you need to write a new vector operation not already supported.
+ In such cases, for efficiency and generality it is best in the long run
+ to implement the operation using the reduction/transformation operator
+ (RTOp) interface.
+ However, writing the operation via vector elements is a workable expedient
+ to get your code up and running quickly.
+\end_layout
+
+\begin_layout Itemize
+If you need to load elements into a vector, for instance when reading from
+ a file.
+ 
+\end_layout
+
+\begin_layout Standard
+If vector element access really is what you need, then here's how to do
+ it.
+ An element of a vector is identified uniquely by its 
+\emph on
+global index
+\emph default
+.
+ To get or set the value of that element, use the 
+\family typewriter
+getElement()
+\family default
+ and 
+\family typewriter
+setElement()
+\family default
+ functions as follows.
+\begin_inset listings
+lstparams "tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+/* set vec[10] = 3.14; */
+\end_layout
+
+\begin_layout Plain Layout
+
+vec.setElement(10, 3.14);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+/* view the new element */
+\end_layout
+
+\begin_layout Plain Layout
+
+Out::os() << vec.getElement(10);
+\end_layout
+
+\end_inset
+
+In a parallel program with a distributed vector space, each processor will
+ contain only a subset of the global indices.
+ To find the range of global indices on each processor, you can use methods
+ of 
+\family typewriter
+VectorSpace.
+\family default
+For example, the following code when run in SPMD mode will fill a distributed
+ vector with values 
+\begin_inset Formula $x_{n}=\sqrt{n}$
+\end_inset
+
+.
+ Each processor sets only the elements 
+\begin_inset Quotes eld
+\end_inset
+
+living
+\begin_inset Quotes erd
+\end_inset
+
+ on that processor.
+ 
+\begin_inset listings
+lstparams "tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+int low = vec.space().lowestLocallyOwnedIndex();
+\end_layout
+
+\begin_layout Plain Layout
+
+int high = low + vec.space().numLocalElements();
+\end_layout
+
+\begin_layout Plain Layout
+
+for (int g=low; g<high; g++) vec.setElement(g, sqrt(g));
+\end_layout
+
+\end_inset
+
+Alternatively, you can use a 
+\family typewriter
+SequentialIterator
+\family default
+ object to walk in order over vector elements.
+ For example, this code fills 
+\begin_inset Formula $x_{n}=\sqrt{n}$
+\end_inset
+
+ using iterators.
+\begin_inset listings
+lstparams "tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+SequentialIterator<double> iter;
+\end_layout
+
+\begin_layout Plain Layout
+
+for (iter=vec.space().begin(); iter != vec.space().end(); iter++)
+\end_layout
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\begin_layout Plain Layout
+
+	int g = iter.globalIndex();
+\end_layout
+
+\begin_layout Plain Layout
+
+	vec[iter] = sqrt(g);
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Writing your own vector operations
+\end_layout
+
+\begin_layout Standard
+Need a clean interface to Bartlett's RTOp system.
+\end_layout
+
+\end_body
+\end_document

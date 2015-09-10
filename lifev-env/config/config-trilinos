@@ -1,0 +1,37 @@
+#!/bin/bash 
+pushd /local/$USER/lifev-env/lifev-env/trilinos-build || return 1
+cmake \
+  -D CMAKE_BUILD_TYPE:STRING=RELEASE \
+  -D CMAKE_INSTALL_PREFIX:STRING="/local/$USER/lifev-env/lifev-env/trilinos-install" \
+  -D TPL_ENABLE_MPI:BOOL=ON \
+  -D TPL_ENABLE_BLAS:BOOL=ON \
+  -D TPL_ENABLE_LAPACK:BOOL=ON \
+  -D TPL_ENABLE_HDF5:BOOL=ON \
+  -D TPL_ENABLE_ParMETIS:BOOL=ON \
+  -D TPL_ENABLE_UMFPACK:BOOL=ON \
+  -D TPL_ENABLE_AMD:BOOL=ON \
+  -D TPL_ENABLE_Boost:BOOL=ON \
+  -D TPL_ENABLE_Zlib:BOOL=ON \
+  -D TPL_ENABLE_Pthread:BOOL=ON \
+  -D Trilinos_ENABLE_Teko:BOOL=ON \
+  -D Trilinos_ENABLE_ShyLU:BOOL=ON \
+  -D Trilinos_ENABLE_Teuchos:BOOL=ON \
+  -D Trilinos_ENABLE_Epetra:BOOL=ON \
+  -D Trilinos_ENABLE_EpetraExt:BOOL=ON \
+  -D Trilinos_ENABLE_Zoltan:BOOL=ON \
+  -D Trilinos_ENABLE_AztecOO:BOOL=ON \
+  -D Trilinos_ENABLE_Belos:BOOL=ON \
+  -D Trilinos_ENABLE_Anasazi:BOOL=ON \
+  -D Trilinos_ENABLE_Amesos:BOOL=ON \
+  -D Trilinos_ENABLE_Ifpack:BOOL=ON \
+  -D Trilinos_ENABLE_ML:BOOL=ON \
+  -D Trilinos_ENABLE_NOX:BOOL=ON \
+  -D Trilinos_ENABLE_Rythmos:BOOL=ON \
+  -D Trilinos_ENABLE_Thyra:BOOL=ON \
+  -D Trilinos_EXTRA_LINK_FLAGS:STRING="-lrt" \
+  -D ParMETIS_INCLUDE_DIRS:PATH=/local/$USER/lifev-env/ParMetis-3.2.0 \
+  -D ParMETIS_LIBRARY_DIRS:PATH=/local/$USER/lifev-env/ParMetis-3.2.0 \
+  -D UMFPACK_INCLUDE_DIRS:PATH="/usr/include/suitesparse" \
+  -D AMD_INCLUDE_DIRS:PATH="/usr/include/suitesparse" \
+  ../../trilinos-11.4.3-Source || return 1
+popd

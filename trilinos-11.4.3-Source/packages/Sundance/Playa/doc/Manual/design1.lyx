@@ -1,0 +1,915 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass extarticle
+\begin_preamble
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\fdo}[1]{\mathcal{D}_{#1}}
+\newcommand{\sdo}[1]{D_{#1}}
+\newcommand{\tdo}[1]{D_{#1}}
+\newcommand{\fd}[2]{\fdo{#1} #2}
+\newcommand{\sd}[2]{\sdo{#1} #2}
+\newcommand{\td}[2]{\tdo{#1} #2}
+\newcommand{\pdd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\pddd}[2]{\frac{\partial^3 #1}{\partial #2^3}}
+\newcommand{\pmix}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+\newcommand{\pmixx}[4]{\frac{\partial^3 #1}{\partial #2 \partial #3 \partial #4}}
+\newcommand{\funcd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\spaced}[2]{{\cal D}^{#1} #2}
+\newcommand{\totald}[2]{{D}^{#1} #2}
+
+\newcommand{\abs}[1]{\left\vert{#1}\right\vert}
+\newcommand{\od}[2]{\frac{d #1}{d #2}}
+\newcommand{\odd}[2]{\frac{d^2 #1}{d #2^2}}
+\newcommand{\R}{\mathbb{R}}
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams
+theorems-ams-extended
+\end_modules
+\language english
+\inputencoding auto
+\font_roman palatino
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\branch answers
+\selected 1
+\color #5555ff
+\end_branch
+\leftmargin 0.9in
+\topmargin 0.75in
+\rightmargin 0.9in
+\bottommargin 0.75in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Playa Design Documentation
+\end_layout
+
+\begin_layout Author
+Kevin Long, Paul T.
+ Boggs, Victoria E.
+ Howle, and Robert C.
+ Kirby
+\end_layout
+
+\begin_layout Section
+Design overview
+\end_layout
+
+\begin_layout Standard
+The Playa design is an evolutionary outgrowth of lessons learned from TSF
+ and Thyra.
+ From Thyra, we adopt the requirement for a minimalist interoperability
+ interface and object representations of vector operations.
+ From TSF we adopt interoperability through chunked data access as well
+ as the use of a handle layer to provide clean object management and to
+ remove pointers from the user interface.
+ From both (and ultimately from their common ancestor, HCL), we adopt the
+ triad of 
+\family typewriter
+VectorSpace
+\family default
+, 
+\family typewriter
+Vector
+\family default
+, and 
+\family typewriter
+LinearOperator
+\family default
+ objects as the foundation of the system.
+\end_layout
+
+\begin_layout Standard
+A significant difference from the designs of both TSF and Thyra as that
+ the Playa vector interoperability interface is data-centric rather than
+ operational.
+ 
+\end_layout
+
+\begin_layout Subsection
+Some software engineering background
+\end_layout
+
+\begin_layout Subsubsection
+Abstraction mechanisms: polymorphism and templating
+\end_layout
+
+\begin_layout Standard
+Playa is intended for the development of algorithms that are abstract in
+ the sense that they are independent of the underlying concrete representation
+ of the objects (
+\emph on
+e.g.
+\emph default
+, vectors and operators) used in the algorithm.
+ There are two principal abstraction mechanisms in C++: polymorphism and
+ templating.
+ Both have pros and cons, and both are used in Playa in different contexts.
+ 
+\end_layout
+
+\begin_layout Itemize
+With polymorphism, one writes a 
+\series bold
+base class
+\series default
+ that defines the operations (
+\emph on
+i.e.
+
+\emph default
+ member functions) that objects of this type can perform.
+ Concrete objects are then implemented as classes that derive from the base.
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Pros: 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+type resolution can be done at runtime
+\end_layout
+
+\begin_layout Itemize
+common behavior can be implemented in base class and inherited by derived
+ types
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Cons: too slow for inner loops of high-performance code
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+With templating, one writes 
+\series bold
+generic code
+\series default
+ that is parameterized by a data type.
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Pros: very fast because type resolution is done at compile time
+\end_layout
+
+\begin_layout Itemize
+Cons: 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+runtime type resolution not possible
+\end_layout
+
+\begin_layout Itemize
+syntax is complicated
+\end_layout
+
+\begin_layout Itemize
+specialized codes don't inherit properties of general case
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Standard
+In Playa we generally use polymorphism except in inner loops.
+ The main use of templating is to implement vector transformation and reduction
+ operations inside generic loops that are templated on functors.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Functors
+\end_layout
+
+\begin_layout Standard
+A 
+\series bold
+functor
+\series default
+ is an object representation of a function (sometimes also known as a function
+ object).
+ Functors are used when one wants to use a single driver to run evaluations
+ of multiple functions.
+ For example, unary elementwise transformations of vectors are implemented
+ as a loop over elements with application of some function at each loop
+ iteration.
+ Without functors, one must duplicate the loop logic for each unary transformati
+on.
+ With functors, one can write the loop logic once and for all around application
+ of a functor's evaluation method.
+ 
+\end_layout
+
+\begin_layout Standard
+Functors can be implemented with either inheritance or templates.
+ In the context of vector transformations and reductions, it is far more
+ efficient to use templates to avoid virtual function calls in inner loops.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Smart pointers and handles
+\end_layout
+
+\begin_layout Standard
+A 
+\series bold
+smart pointer
+\series default
+ is an object that behaves syntactically like an ordinary pointer, yet tracks
+ the number of references to the pointer and automatically deletes it when
+ the reference count goes to zero.
+ Playa uses the 
+\family typewriter
+RCP
+\family default
+ templated smart pointer from the Teuchos library.
+ See the extensive documentation on 
+\family typewriter
+RCP
+\family default
+ for more information.
+ Only a small subset of the RCP feature set is used by Playa.
+\end_layout
+
+\begin_layout Standard
+A 
+\series bold
+handle
+\series default
+ is a wrapper placed around a smart pointer to hide the pointer-like behavior,
+ making it appear that the contents are an 
+\begin_inset Quotes eld
+\end_inset
+
+ordinary
+\begin_inset Quotes erd
+\end_inset
+
+ object rather than a pointer (
+\begin_inset Quotes eld
+\end_inset
+
+value semantics
+\begin_inset Quotes erd
+\end_inset
+
+ instead of 
+\begin_inset Quotes eld
+\end_inset
+
+pointer semantics
+\begin_inset Quotes erd
+\end_inset
+
+).
+ Handles make clean operator overloading possible, 
+\emph on
+e.g.
+ 
+\emph default
+we can write
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+a = b + c;
+\end_layout
+
+\end_inset
+
+instead of the clumsy
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+*a= *b + *c;
+\end_layout
+
+\end_inset
+
+Furthermore, by virtue of their position between the low-level object implementa
+tions and the user, handles provide a setting in which maintenance tasks
+ can be carried out.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Factory objects
+\end_layout
+
+\begin_layout Subsection
+Bookkeeping: blocks and chunks, iterators, and indices
+\end_layout
+
+\begin_layout Subsubsection
+Blocks versus chunks
+\end_layout
+
+\begin_layout Standard
+VectorSpace objects, and hence the Vectors and operators associated with
+ them, can have internal substructure for use in algorithms such as such
+ as block preconditioners.
+ A superficially similar idea is that Vector operations may best be implemented
+ in terms of chunks of data, perhaps not even located contiguously in memory.
+ It's important to understand the difference between these two ideas.
+ 
+\end_layout
+
+\begin_layout Itemize
+A 
+\series bold
+block
+\series default
+ is a subset of elements organized so that the block can act as a vector
+ independently of its parent vector.
+ Each block is itself represented as a Vector object.
+ Block structure can be recursive, so that a block may itself contain several
+ blocks.
+ Vector spaces are also blocked, with their members having an identical
+ block structure.
+ Operators can be blocked according to the structures of their domain and
+ range spaces.
+ 
+\end_layout
+
+\begin_layout Itemize
+A 
+\series bold
+chunk
+\series default
+ is a subset of the elements of a vector organized for fast, strided, sequential
+ access.
+ Unlike a block, a chunk of a Vector is not itself a Vector, and chunks
+ do not contain subchunks.
+ A simple (though no longer very important) example of chunking arises with
+ vectors implemented with out-of-core storage; elements would be read into
+ memory in batches -- chunks -- for processing in-core, then written back.
+ Chunking is an implementation issue that should rarely if ever show up
+ at the level of a solver algorithm.
+ One might need to work with chunks when programming an operation requiring
+ optimally-fast traversal of a vector's elements; however, in that case
+ it is usually better to define a functor to represent the operation and
+ let one of Playa's built-in functor application methods do the loop over
+ chunks.
+\end_layout
+
+\begin_layout Standard
+To summarize, blocks are high-level objects and chunks are low-level implementat
+ion details.
+ Someone writing a Krylov solver will never need to worry about chunks,
+ but someone writing a vector adapter or a fast architecture-tuned loop
+ will.
+\end_layout
+
+\begin_layout Standard
+To confuse things further, the word 
+\begin_inset Quotes eld
+\end_inset
+
+block
+\begin_inset Quotes erd
+\end_inset
+
+ is used in several different ways by different Trilinos packages.
+ Epetra has block maps and block vectors which might be used, for example,
+ to group several variables appearing at each node in a mesh.
+ Anasazi and Belos use 
+\begin_inset Quotes eld
+\end_inset
+
+block
+\begin_inset Quotes erd
+\end_inset
+
+ to indicate a collection of vectors grouped into a multivector.
+ Unless otherwise indicated, in this document 
+\begin_inset Quotes eld
+\end_inset
+
+block
+\begin_inset Quotes erd
+\end_inset
+
+ is used in the sense defined above.
+\end_layout
+
+\begin_layout Subsubsection
+Locating blocks
+\end_layout
+
+\begin_layout Standard
+Each of a block vector's immediate children are numbered in order, 
+\family typewriter
+0,1,...,numBlocks().
+
+\family default
+ This is sufficient to locate each immediate child block.
+ However, each child may itself have one or more levels of block structure.
+ So in general, block structure is modeled by a tree with a variable number
+ of branches attaching to each node.
+ Each node can be identified uniquely by a generalized index, which is the
+ sequence of indices indicating the sequence of branches to follow from
+ the root to reach that node.
+ This sequence is implemented as a 
+\family typewriter
+std::deque<int>
+\family default
+ because during traversal of the tree it is required to build and read indices
+ from both ends of the generalized index.
+ So one way to identify a block is to specify the deque of indices needed
+ to reach it.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename BlockExample.pdf
+	scale 35
+	clip
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Example of using generalized indexes to locate blocks in a heterogeneously
+ structured vector.
+ 
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "Flo:BlockVecExample"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In many cases one will want to loop over all blocks in a vector without
+ seeing the vector's recursive structure.
+ This is simply an in-order traversal of the tree's leaves, as shown in
+ figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Flo:BlockTree"
+
+\end_inset
+
+.
+ This traversal can be implemented in a flat loop by using a 
+\family typewriter
+BlockIterator
+\family default
+ object as shown in the following code sample.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+VectorSpace<double> space = get_space_somehow();
+\end_layout
+
+\begin_layout Plain Layout
+
+Vector<double> x = get_vector_somehow(space);
+\end_layout
+
+\begin_layout Plain Layout
+
+Vector<double> y = get_another_vector_somehow(space);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+for (BlockIterator<double> b=space.beginBlock(); b !=space.endBlock(); b++)
+\end_layout
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\begin_layout Plain Layout
+
+  const Vector<double>& xb = x.getBlock(b);
+\end_layout
+
+\begin_layout Plain Layout
+
+  Vector<double> yb = y.getNonConstBlock(b);
+\end_layout
+
+\begin_layout Plain Layout
+
+  yb.dotStar(xb);
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One thing to notice is that the iterator is associated with a 
+\family typewriter
+VectorSpace
+\family default
+, not with a 
+\family typewriter
+Vector
+\family default
+.
+ This lets the same iterator be used to locate blocks in any vectors that
+ are members of that space.
+ Notice also the distinction between const and non-const access.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename BlockTree.pdf
+	scale 30
+	clip
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Plain Layout
+In-order traversal of the block vector shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Flo:BlockVecExample"
+
+\end_inset
+
+, shown here as a tree.
+ The leaves are visited in the sequence ABCDEF.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "Flo:BlockTree"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Indices: locating elements
+\end_layout
+
+\begin_layout Standard
+Naively the index of a vector element is a locator, unique to that element,
+ that can be used to set or retrieve the value of the element.
+ This apparently simple idea needs careful definition to avoid ambiguity.
+ The source of the difficulty is the fact that a block can be viewed as
+ a standalone vector or as part of a larger vector, because the same element
+ can be indexed differently depending on whether it is viewed 
+\end_layout
+
+\begin_layout Itemize
+A 
+\series bold
+native index
+\series default
+ is an index used internally by a vector implementation.
+ It is indifferent to block structure.
+ Assignment of native indices are essentially arbitrary, for example, they
+ need not be contiguous.
+ In a distributed environment there may be both 
+\series bold
+local
+\series default
+ and 
+\series bold
+global
+\series default
+ native indices, which we'll abbreviate as 
+\series bold
+LNI
+\series default
+ and 
+\series bold
+GNI
+\series default
+.
+ The global and local indices used by 
+\family typewriter
+Epetra
+\family default
+ vectors are examples of 
+\series bold
+GNI
+\series default
+ and 
+\series bold
+LNI
+\series default
+ respectively.
+ 
+\end_layout
+
+\begin_layout Itemize
+An 
+\series bold
+contextual index
+\series default
+ is an index defined by the position of an element during in-order traversal
+ of a vector's blocks.
+ For a given element of a given vector, the contextual index will depend
+ on whether that vector is viewed as a standalone vector or as one of several
+ blocks in a parent block vector.
+ As with native indices, there are local and global contextual indices,
+ called 
+\series bold
+LCI
+\series default
+ and 
+\series bold
+GCI
+\series default
+ respectively.
+ 
+\end_layout
+
+\begin_layout Standard
+Here is an example of local contextual indexing for vectors 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+, 
+\begin_inset Formula $\mathbf{B}$
+\end_inset
+
+, 
+\begin_inset Formula $\mathbf{C}$
+\end_inset
+
+, 
+\begin_inset Formula $\mathbf{D}$
+\end_inset
+
+, 
+\begin_inset Formula $\mathbf{E}$
+\end_inset
+
+, 
+\begin_inset Formula $\mathbf{F}$
+\end_inset
+
+ independently and as embedded in a block vector 
+\begin_inset Formula \[
+\mathbf{x=\left[A,\left[\left[\mathbf{B,C}\right],D\right],\left[E,F\right]\right]}.\]
+
+\end_inset
+
+Let 
+\begin_inset Formula $\mathbf{u=\left[\mathbf{B,C}\right]}$
+\end_inset
+
+, 
+\begin_inset Formula $\mathbf{v=\left[u,D\right]}$
+\end_inset
+
+, 
+\begin_inset Formula $\mathbf{w=\left[E,F\right]}$
+\end_inset
+
+ so that 
+\begin_inset Formula $\mathbf{x=\left[A,v,w\right]}$
+\end_inset
+
+.
+ Then the root level is indexed as
+\begin_inset Formula \[
+\mathbf{x}=\left[x_{0},x_{1},\cdots,x_{N_{A}},\cdots,x_{N_{A}+N_{v}},\cdots,x_{N_{A}+N_{v}+N_{w}}\right]\]
+
+\end_inset
+
+and the various subblocks are indexed as 
+\begin_inset Formula \[
+\mathbf{x}=\left[\left[A_{0},\cdots,A_{N_{A}}\right],\left[\underbrace{\underbrace{\left[\left[B_{0},\cdots,B_{N_{B}}\right],\left[C_{0},\cdots,C_{N_{C}}\right]\right]}_{\left[u_{0},u_{1},\cdots,u_{N_{B}},u_{N_{B}+1},\cdots,u_{N_{B}+N_{C}}\right]},\left[D_{0},\cdots,D_{N_{D}}\right]}_{\left[v_{0},v_{1},\cdots,v_{N_{B}+N_{C}},\cdots,v_{N_{B}+N_{C}+N_{D}}\right]}\right],\left[\underbrace{\left[E_{0},\cdots,E_{N_{E}}\right],\left[F_{0},\cdots,F_{N_{F}}\right]}_{\left[w_{0},w_{1},\cdots,w_{N_{E}},w_{N_{E}+1},\cdots,w_{N_{E}+N_{F}}\right]}\right]\right].\]
+
+\end_inset
+
+Let's next look at indexing of distributed vectors.
+ Some notation is in order.
+ To distinguish partitioning over processors from partitioning into blocks,
+ elements residing on a single processor will be grouped between floor brackets
+ 
+\begin_inset Formula $\left\lfloor \cdot\right\rfloor $
+\end_inset
+
+.
+ In a distributed computer having 
+\begin_inset Formula $R$
+\end_inset
+
+ processers, the processors are assumed to be identified by rank index 
+\begin_inset Formula $r=0,1,\dots,R-1$
+\end_inset
+
+.
+ If 
+\begin_inset Formula $N_{r}$
+\end_inset
+
+ is the number of elements on processor 
+\begin_inset Formula $r$
+\end_inset
+
+, then 
+\begin_inset Formula $S(r)$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $S(r)=\sum_{j=0}^{r}N_{j}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\left[\left\lfloor \begin{array}{cccc}
+A_{0} & A_{1} & \cdots & A_{N_{0}-1}\end{array}\right\rfloor \left\lfloor \begin{array}{cccc}
+A_{N_{0}} & A_{N_{0}+1} & \cdots & A_{N_{0}+N_{1}-1}\end{array}\right\rfloor \cdots\left\lfloor A_{S(r)}\cdots A_{S(r+1)-1}\right\rfloor \cdots\left\lfloor A_{S(R-2)}\cdots A_{S(R-1)-1}\right\rfloor \right]\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+User interface vs interoperability interface
+\end_layout
+
+\begin_layout Subsection
+Vectors and vector spaces
+\end_layout
+
+\begin_layout Subsubsection
+Key concepts: blocks and chunks, indices and iterators
+\end_layout
+
+\begin_layout Subsubsection
+Interoperability interface
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename VecSubtypes.pdf
+	scale 50
+	clip
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Inheritance diagram for VectorBase subtypes
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+User interface
+\end_layout
+
+\begin_layout Subsubsection
+Indexing into vectors
+\end_layout
+
+\begin_layout Itemize
+Global index
+\end_layout
+
+\begin_layout Itemize
+Local index
+\end_layout
+
+\begin_layout Itemize
+Flat index
+\end_layout
+
+\end_body
+\end_document
